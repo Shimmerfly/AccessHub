@@ -5,6 +5,19 @@ plugins {
     id("kotlin-parcelize")
 }
 
+// Version stamp: versionName is "git+<short sha>", versionCode is the commit count.
+// Both stay lazy providers: reading them during configuration would invalidate the
+// configuration cache on every commit.
+val commitCount = providers.exec {
+    workingDir(rootProject.layout.projectDirectory)
+    commandLine("git", "rev-list", "--count", "HEAD")
+}.standardOutput.asText.map { it.trim().toInt() }
+
+val gitHash = providers.exec {
+    workingDir(rootProject.layout.projectDirectory)
+    commandLine("git", "rev-parse", "--short=7", "HEAD")
+}.standardOutput.asText.map { it.trim() }
+
 android {
     namespace = "dev.sol.accesshub"
     compileSdk {
@@ -17,6 +30,7 @@ android {
         applicationId = "dev.sol.accesshub"
         minSdk = 24
         targetSdk = 37
+        // Placeholders only; the git stamp below overrides them for every variant.
         versionCode = 1
         versionName = "1.0.0"
         vectorDrawables { useSupportLibrary = true }
@@ -45,6 +59,9 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        // The privileged `settings` calls go through a Shizuku UserService, which is declared
+        // as AIDL (IShellService).
+        aidl = true
     }
 
     androidResources {
@@ -64,6 +81,15 @@ kotlin {
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
         )
+    }
+}
+
+androidComponents {
+    onVariants { variant ->
+        variant.outputs.forEach { output ->
+            output.versionCode.set(commitCount)
+            output.versionName.set(gitHash.map { "git+$it" })
+        }
     }
 }
 
