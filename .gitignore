@@ -1,0 +1,24 @@
+# Gradle
+.gradle/
+.gradle_home/
+build/
+.kotlin/
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Local machine configuration
+local.properties
+.DS_Store
+
+# Reference material kept out of version control
+KernelSU-Style-UI-Kit-main/
+main.zip
+/wrapper/
+
+# Leftover patch from the UI port
+app/build.gradle.kts.patch
