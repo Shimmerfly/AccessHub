@@ -60,6 +60,7 @@ import dev.sol.accesshub.ui.navigation3.Navigator
 import dev.sol.accesshub.ui.navigation3.Route
 import dev.sol.accesshub.ui.navigation3.rememberNavigator
 import dev.sol.accesshub.ui.screen.about.AboutScreen
+import dev.sol.accesshub.ui.screen.accessibility.AccessibilityPager
 import dev.sol.accesshub.ui.screen.colorpalette.ColorPaletteScreen
 import dev.sol.accesshub.ui.screen.home.HomePager
 import dev.sol.accesshub.ui.screen.permission.PermissionScreen
@@ -228,7 +229,8 @@ fun MainScreen(
                     val isCurrentPage = page == settledPage
                     when (page) {
                         0 -> if (isCurrentPage || contentReady) HomePager(navController, bottomInnerPadding, isCurrentPage)
-                        1 -> if (isCurrentPage || contentReady) SettingPager(navController, bottomInnerPadding)
+                        1 -> if (isCurrentPage || contentReady) AccessibilityPager(bottomInnerPadding, isCurrentPage)
+                        2 -> if (isCurrentPage || contentReady) SettingPager(navController, bottomInnerPadding)
                     }
                 }
             }

@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessibilityNew
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.AccessibilityNew
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
@@ -31,6 +33,11 @@ fun NavigationRailMaterial(
 
     val items = listOf(
         Triple(R.string.home, Icons.Filled.Home, Icons.Outlined.Home),
+        Triple(
+            R.string.accessibility_tab,
+            Icons.Filled.AccessibilityNew,
+            Icons.Outlined.AccessibilityNew
+        ),
         Triple(R.string.settings, Icons.Filled.Settings, Icons.Outlined.Settings)
     )
 
