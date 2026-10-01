@@ -1,12 +1,54 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name" translatable="false">AccessHub</string>
-    <string name="home_sample_notification" translatable="false">这是一条示例通知</string>
-    <string name="home_app_version" translatable="false">App 版本</string>
-    <string name="home_example_link_title" translatable="false">这是一条示例链接</string>
-    <string name="home_example_link_subtitle" translatable="false">这是示例链接的副标题</string>
-    <string name="home_example_link_url" translatable="false">https://github.com/chenaizhang/KernelSU-Style-UI-Kit</string>
+
+    <!-- Home -->
+    <string name="home_shizuku_or_sui">Shizuku / Sui</string>
+    <string name="home_app_version">App version</string>
+    <string name="home_android_version">Android version</string>
+    <string name="home_device_model">Device model</string>
+    <string name="home_fingerprint">System fingerprint</string>
+    <string name="home_accessibility_services">Accessibility services</string>
+    <string name="home_accessibility_services_value">%1$d enabled / %2$d installed</string>
+    <string name="home_shizuku_value">Version %1$d · UID %2$d</string>
+    <string name="home_shizuku_unavailable">Not connected</string>
+    <string name="home_provider_ready">%1$s is ready</string>
+    <string name="home_shizuku_ready_summary">Version %1$d · UID %2$d</string>
+    <string name="home_shizuku_mode_adb">ADB</string>
+    <string name="home_shizuku_mode_root">ROOT</string>
+    <string name="home_shizuku_detecting">Checking Shizuku / Sui…</string>
+    <string name="home_shizuku_detecting_summary">Looking for a running Shizuku or Sui service.</string>
+    <string name="home_shizuku_not_installed">Shizuku or Sui is not installed</string>
+    <string name="home_shizuku_not_installed_summary">Tap to learn how to install Shizuku (no root) or Sui (Magisk module).</string>
+    <string name="home_shizuku_not_running">Shizuku is not running</string>
+    <string name="home_shizuku_not_running_summary">Tap to open Shizuku and start the service.</string>
+    <string name="home_sui_not_running">Sui is unavailable</string>
+    <string name="home_sui_not_running_summary">The Sui module may be disabled, or Sui denied this app. Tap to read how Sui works.</string>
+    <string name="home_shizuku_no_permission">%1$s is not authorized</string>
+    <string name="home_shizuku_no_permission_summary">Tap to grant this app access to %1$s.</string>
+    <string name="home_update_available">Version %1$d is available. Tap to see what changed.</string>
+    <string name="home_update_dialog_title">Changelog</string>
+    <string name="home_update_confirm">Update</string>
+    <string name="home_link_repo_title">Project repository</string>
+    <string name="home_link_repo_summary">Browse the %1$s source on GitHub</string>
+    <string name="home_link_shizuku_title">About Shizuku / Sui</string>
+    <string name="home_link_shizuku_summary">What Shizuku or Sui is and how to start it</string>
+    <string name="home_link_permissions_title">App permissions</string>
+    <string name="home_link_permissions_summary">Manage notifications, storage and other permissions</string>
+    <string name="home_repo_url" translatable="false">https://github.com/Shimmerfly/AccessHub</string>
+    <string name="home_shizuku_url" translatable="false">https://shizuku.rikka.app/</string>
+    <string name="home_sui_url" translatable="false">https://github.com/RikkaApps/Sui</string>
+
+    <!-- Accessibility services -->
+    <string name="accessibility_tab">Services</string>
+    <string name="accessibility_empty">No accessibility service found</string>
+    <string name="accessibility_empty_summary">Install an app that provides an accessibility service, then come back to this page.</string>
+    <string name="accessibility_need_permission">Toggling services needs Shizuku or Sui access. Tap to request it.</string>
+    <string name="accessibility_toggle_failed">Could not update the service: %1$s</string>
+
     <string name="about_source_link" translatable="false">在%1$s 上查看源码</string>
+
+    <!-- Permissions -->
     <string name="permission_section">Permissions</string>
     <string name="permission_ready">Core permissions are ready.</string>
     <string name="permission_missing">Grant missing permissions first.</string>
@@ -22,6 +64,7 @@
     <string name="permission_grant_action">Grant</string>
     <string name="permission_status_ready_title">Permissions Ready</string>
     <string name="permission_status_missing_title">Permissions Required</string>
+
     <string name="home">Home</string>
     <string name="confirm">Confirm</string>
     <string name="settings">Settings</string>
@@ -69,4 +112,4 @@
     <string name="settings_floating_bottom_bar_summary">Use Apple style floating bottom bar.</string>
     <string name="settings_enable_glass">Liquid glass</string>
     <string name="settings_enable_glass_summary">Enable liquid glass effect for floating bottom bar.</string>
-    </resources>
+</resources>

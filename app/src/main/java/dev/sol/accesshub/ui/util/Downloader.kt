@@ -5,7 +5,7 @@ import okhttp3.Request
 
 fun checkNewVersion(): LatestVersionInfo {
     if (!isNetworkAvailable(accessHubApp)) return LatestVersionInfo()
-    val url = "https://api.github.com/repos/chenaizhang/KernelSU-Style-UI-Kit/releases/latest"
+    val url = "https://api.github.com/repos/Shimmerfly/AccessHub/releases/latest"
     // default null value if failed
     val defaultValue = LatestVersionInfo()
     runCatching {
