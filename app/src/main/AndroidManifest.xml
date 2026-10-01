@@ -16,6 +16,7 @@
         <intent>
             <action android:name="android.intent.action.MAIN" />
         </intent>
+        <package android:name="moe.shizuku.privileged.api" />
         <package android:name="moe.shizuku.privilege.api" />
         <package android:name="com.topjohnwu.magisk" />
     </queries>

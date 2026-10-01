@@ -6,6 +6,8 @@ import android.os.Build
 import android.os.UserManager
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
+import dev.sol.accesshub.shizuku.ShizukuManager
+import dev.sol.accesshub.shizuku.ShizukuShell
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import org.lsposed.hiddenapibypass.HiddenApiBypass
@@ -40,6 +42,10 @@ class AccessHubApp : Application(), ViewModelStoreOwner {
         if (!isUserUnlocked()) {
             return
         }
+
+        // Shizuku only answers after the first unlock, so the binder listeners are wired up here.
+        ShizukuManager.init(this)
+        ShizukuShell.init(packageName)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             val prefs = this.getSharedPreferences("settings", MODE_PRIVATE)
