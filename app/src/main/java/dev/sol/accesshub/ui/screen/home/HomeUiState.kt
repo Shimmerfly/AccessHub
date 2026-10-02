@@ -35,5 +35,4 @@ data class HomeActions(
     val onOpenUrl: (String) -> Unit = {},
     val onRequestShizukuPermission: () -> Unit = {},
     val onOpenShizuku: () -> Unit = {},
-    val onPermissionsClick: () -> Unit = {},
 )

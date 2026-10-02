@@ -16,7 +16,14 @@ class SettingsViewModel(
     private val repo: SettingsRepository = SettingsRepositoryImpl()
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(SettingsUiState())
+    // Same first-frame concern as the services page: seed the appearance toggles synchronously.
+    private val _uiState = MutableStateFlow(
+        SettingsUiState(
+            enableNavigationBadge = repo.enableNavigationBadge,
+            hideSystemApps = repo.hideSystemApps,
+            serviceDescriptionMaxLines = repo.serviceDescriptionMaxLines,
+        )
+    )
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     init {
@@ -33,6 +40,9 @@ class SettingsViewModel(
             val enableBlur = repo.enableBlur
             val enableFloatingBottomBar = repo.enableFloatingBottomBar
             val enableFloatingBottomBarBlur = repo.enableFloatingBottomBarBlur
+            val enableNavigationBadge = repo.enableNavigationBadge
+            val hideSystemApps = repo.hideSystemApps
+            val serviceDescriptionMaxLines = repo.serviceDescriptionMaxLines
             val pageScale = repo.pageScale
             val colorStyle = repo.colorStyle
             val colorSpec = repo.colorSpec
@@ -49,6 +59,9 @@ class SettingsViewModel(
                     enableBlur = enableBlur,
                     enableFloatingBottomBar = enableFloatingBottomBar,
                     enableFloatingBottomBarBlur = enableFloatingBottomBarBlur,
+                    enableNavigationBadge = enableNavigationBadge,
+                    hideSystemApps = hideSystemApps,
+                    serviceDescriptionMaxLines = serviceDescriptionMaxLines,
                     pageScale = pageScale,
                     colorStyle = colorStyle,
                     colorSpec = colorSpec,
@@ -154,6 +167,22 @@ class SettingsViewModel(
     fun setEnableFloatingBottomBarBlur(enabled: Boolean) {
         repo.enableFloatingBottomBarBlur = enabled
         _uiState.update { it.copy(enableFloatingBottomBarBlur = enabled) }
+    }
+
+    fun setEnableNavigationBadge(enabled: Boolean) {
+        repo.enableNavigationBadge = enabled
+        _uiState.update { it.copy(enableNavigationBadge = enabled) }
+    }
+
+    fun setHideSystemApps(enabled: Boolean) {
+        repo.hideSystemApps = enabled
+        _uiState.update { it.copy(hideSystemApps = enabled) }
+    }
+
+    fun setServiceDescriptionMaxLines(lines: Int) {
+        val clamped = lines.coerceIn(1, 10)
+        repo.serviceDescriptionMaxLines = clamped
+        _uiState.update { it.copy(serviceDescriptionMaxLines = clamped) }
     }
 
     fun setPageScale(scale: Float) {

@@ -18,6 +18,9 @@ data class SettingsUiState(
     val enableBlur: Boolean = true,
     val enableFloatingBottomBar: Boolean = true,
     val enableFloatingBottomBarBlur: Boolean = true,
+    val enableNavigationBadge: Boolean = true,
+    val hideSystemApps: Boolean = false,
+    val serviceDescriptionMaxLines: Int = 4,
     val pageScale: Float = 1.0f,
 )
 
