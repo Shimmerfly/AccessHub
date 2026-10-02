@@ -65,12 +65,19 @@ jobs:
           :app:assembleDebug
           :app:assembleRelease
 
+      - name: Prepare named APKs
+        if: ${{ success() }}
+        run: |
+          mkdir -p artifacts
+          cp app/build/outputs/apk/debug/app-debug.apk artifacts/app-debug.apk
+          cp app/build/outputs/apk/release/app-release.apk artifacts/app-release.apk
+
       - name: Upload APKs
         if: ${{ success() }}
         uses: actions/upload-artifact@v4
         with:
           name: accesshub-apks-${{ github.sha }}
-          path: app/build/outputs/apk/**/*.apk
+          path: artifacts/app-*.apk
           if-no-files-found: error
           retention-days: 14
 
