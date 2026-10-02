@@ -10,7 +10,7 @@
     <string name="home_fingerprint">System fingerprint</string>
     <string name="home_accessibility_services">Accessibility services</string>
     <string name="home_accessibility_services_value">%1$d enabled / %2$d installed</string>
-    <string name="home_shizuku_value">Version %1$d · UID %2$d</string>
+    <string name="home_shizuku_value">API %1$d · UID %2$d</string>
     <string name="home_shizuku_unavailable">Not connected</string>
     <string name="home_provider_ready">%1$s is ready</string>
     <string name="home_shizuku_ready_summary">Version %1$d · UID %2$d</string>
@@ -102,8 +102,8 @@
     <string name="settings_hide_system_apps">Hide system apps</string>
     <string name="settings_hide_system_apps_summary">Hide the system-app section on the Services page</string>
     <string name="settings_service_description_max_lines">Service description lines</string>
-    <string name="settings_service_description_max_lines_summary">How many lines of an expanded service description to show</string>
-    <string name="settings_service_description_max_lines_all">All</string>
+    <string name="settings_service_description_max_lines_summary">Descriptions longer than this fold automatically.</string>
+    <string name="settings_service_description_max_lines_all">No folding</string>
     <string name="settings_page_scale">Page Scale</string>
     <string name="settings_page_scale_summary">Adjust the global display scale.</string>
     <string name="settings_color_spec">Color Spec</string>
@@ -127,6 +127,13 @@
     <string name="settings_enable_blur_summary">Enable blur effect for top and bottom bars.</string>
     <string name="settings_floating_bottom_bar">Floating bottom bar</string>
     <string name="settings_floating_bottom_bar_summary">Use Apple style floating bottom bar.</string>
+    <string name="settings_floating_bottom_bar_labels">Show floating bar labels</string>
+    <string name="settings_floating_bottom_bar_labels_summary">Print a label under every icon in the floating bottom bar.</string>
     <string name="settings_enable_glass">Liquid glass</string>
     <string name="settings_enable_glass_summary">Enable liquid glass effect for floating bottom bar.</string>
+    <string name="accessibility_talkback_warning_title">Enable TalkBack?</string>
+    <string name="accessibility_talkback_warning">Enabling this may change how the system behaves. If you are not sure what it does, please do not enable it.</string>
+    <string name="accessibility_talkback_enable_anyway">Enable anyway</string>
+    <string name="home_shizuku_ready_uid">UID %1$d</string>
+    <string name="home_shizuku_api_badge">API %1$d</string>
 </resources>
