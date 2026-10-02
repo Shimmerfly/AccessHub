@@ -26,6 +26,7 @@ data class ColorPaletteScreenActions(
     val onSetEnableBlur: (Boolean) -> Unit,
     val onSetEnableFloatingBottomBar: (Boolean) -> Unit,
     val onSetEnableFloatingBottomBarBlur: (Boolean) -> Unit,
+    val onSetShowFloatingBottomBarLabels: (Boolean) -> Unit,
     val onSetEnableNavigationBadge: (Boolean) -> Unit,
     val onSetHideSystemApps: (Boolean) -> Unit,
     val onSetServiceDescriptionMaxLines: (Int) -> Unit,

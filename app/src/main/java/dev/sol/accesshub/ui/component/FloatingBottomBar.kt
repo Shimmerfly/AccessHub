@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
@@ -186,8 +187,10 @@ fun FloatingBottomBar(
 ) {
     val isInDark = isInDarkTheme()
     val pillShape = remember { CircleShape }
-    val accentColor = MiuixTheme.colorScheme.primary
-    val surfaceContainer = MiuixTheme.colorScheme.surfaceContainer
+    // Colours come from the MD3 theme so the bar follows the app's dynamic palette while keeping
+    // the upstream shape and motion.
+    val accentColor = MaterialTheme.colorScheme.primary
+    val surfaceContainer = MaterialTheme.colorScheme.surfaceContainer
     val containerColor = if (isBlurEnabled) surfaceContainer.copy(0.4f) else surfaceContainer
 
     val tabsBackdrop = rememberLayerBackdrop()

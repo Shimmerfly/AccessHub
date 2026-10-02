@@ -113,7 +113,7 @@ fun BottomBar(
 ) {
     when (LocalUiMode.current) {
         UiMode.Miuix -> BottomBarMiuix(blurBackdrop, backdrop, navigationBadge, modifier)
-        UiMode.Material -> BottomBarMaterial(navigationBadge)
+        UiMode.Material -> BottomBarMaterial(navigationBadge, modifier)
     }
 }
 

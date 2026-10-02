@@ -12,5 +12,6 @@ data class MainActivityUiState(
     val enableNavigationBadge: Boolean,
     val enableFloatingBottomBar: Boolean,
     val enableFloatingBottomBarBlur: Boolean,
+    val showFloatingBottomBarLabels: Boolean = false,
     val uiMode: UiMode,
 )

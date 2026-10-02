@@ -66,25 +66,15 @@ internal fun cachedColorScheme(
     isAmoled: Boolean,
     style: PaletteStyle,
     specVersion: ColorSpec.SpecVersion,
-    primary: Color = Color.Unspecified,
-    secondary: Color = Color.Unspecified,
-    tertiary: Color = Color.Unspecified,
-    neutral: Color = Color.Unspecified,
-    neutralVariant: Color = Color.Unspecified,
-    error: Color = Color.Unspecified,
 ): ColorScheme = paletteSchemeCache.getOrPut(
     PaletteKey(color, isDark, isAmoled, style, specVersion)
 ) {
+    // Only the seed goes in: passing the dynamic-colour overrides would replace every role with
+    // Color.Unspecified and wash the whole palette out to grey.
     dynamicColorScheme(
         seedColor = color,
         isDark = isDark,
         isAmoled = isAmoled,
-        primary = primary,
-        secondary = secondary,
-        tertiary = tertiary,
-        neutral = neutral,
-        neutralVariant = neutralVariant,
-        error = error,
         style = style,
         specVersion = specVersion,
     )

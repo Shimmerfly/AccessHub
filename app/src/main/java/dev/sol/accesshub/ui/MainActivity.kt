@@ -74,6 +74,7 @@ import dev.sol.accesshub.ui.theme.LocalColorMode
 import dev.sol.accesshub.ui.theme.LocalEnableBlur
 import dev.sol.accesshub.ui.theme.LocalEnableFloatingBottomBar
 import dev.sol.accesshub.ui.theme.LocalEnableFloatingBottomBarBlur
+import dev.sol.accesshub.ui.theme.LocalShowFloatingBottomBarLabels
 import dev.sol.accesshub.ui.theme.LocalEnableNavigationBadge
 import dev.sol.accesshub.ui.util.rememberBlurBackdrop
 import dev.sol.accesshub.ui.util.rememberContentReady
@@ -83,6 +84,7 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import dev.sol.accesshub.data.repository.EnabledServicesCounter
 
 class MainActivity : ComponentActivity() {
 
@@ -129,6 +131,7 @@ class MainActivity : ComponentActivity() {
                 LocalEnableNavigationBadge provides uiState.enableNavigationBadge,
                 LocalEnableFloatingBottomBar provides uiState.enableFloatingBottomBar,
                 LocalEnableFloatingBottomBarBlur provides uiState.enableFloatingBottomBarBlur,
+                LocalShowFloatingBottomBarLabels provides uiState.showFloatingBottomBarLabels,
                 LocalUiMode provides uiMode,
             ) {
                 AccessHubTheme(appSettings = appSettings, uiMode = uiMode) {
@@ -203,23 +206,23 @@ fun MainScreen(
     // Services page), so read it whenever this screen enters the composition or the page changes.
     // A resume effect alone is not enough: when the theme toggle brings this screen back, the
     // composition starts after the host is already resumed, so that ON_RESUME never arrives.
-    var enabledServiceCount by remember { mutableIntStateOf(0) }
+    // One shared counter: this screen publishes what it reads, the services page publishes what it
+    // toggles, and the badge just shows whatever was published last.
+    val publishedCount by EnabledServicesCounter.count.collectAsStateWithLifecycle()
     LaunchedEffect(enableNavigationBadge, mainPagerState.pagerState.settledPage) {
-        enabledServiceCount = if (enableNavigationBadge) {
-            AccessibilityRepository(accessHubApp).readEnabled().services.size
-        } else {
-            0
-        }
+        EnabledServicesCounter.publish(
+            if (enableNavigationBadge) AccessibilityRepository(accessHubApp).readEnabled().services.size else 0
+        )
     }
     LifecycleResumeEffect(enableNavigationBadge) {
-        enabledServiceCount = if (enableNavigationBadge) {
-            AccessibilityRepository(accessHubApp).readEnabled().services.size
-        } else {
-            0
-        }
+        EnabledServicesCounter.publish(
+            if (enableNavigationBadge) AccessibilityRepository(accessHubApp).readEnabled().services.size else 0
+        )
         onPauseOrDispose { }
     }
-    val navigationBadge = NavigationBadgeState(enabledServiceCount = enabledServiceCount)
+    val navigationBadge = NavigationBadgeState(
+        enabledServiceCount = if (enableNavigationBadge) publishedCount ?: 0 else 0
+    )
 
     val backdrop = rememberLayerBackdrop {
         drawRect(surfaceColor)
@@ -239,7 +242,8 @@ fun MainScreen(
     MainScreenBackHandler(mainPagerState, navController)
 
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-    val useNavigationRail = isLandscape && !(uiMode == UiMode.Miuix && enableFloatingBottomBar)
+    // A floating bar replaces the rail in both themes, so the bar is never hidden behind it.
+    val useNavigationRail = isLandscape && !enableFloatingBottomBar
 
     CompositionLocalProvider(
         LocalMainPagerState provides mainPagerState

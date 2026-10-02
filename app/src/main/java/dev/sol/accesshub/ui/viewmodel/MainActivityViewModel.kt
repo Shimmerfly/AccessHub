@@ -51,6 +51,7 @@ class MainActivityViewModel(
             enableNavigationBadge = settingRepo.enableNavigationBadge,
             enableFloatingBottomBar = settingRepo.enableFloatingBottomBar,
             enableFloatingBottomBarBlur = settingRepo.enableFloatingBottomBarBlur,
+            showFloatingBottomBarLabels = settingRepo.showFloatingBottomBarLabels,
             uiMode = UiMode.fromValue(settingRepo.uiMode),
         )
     }

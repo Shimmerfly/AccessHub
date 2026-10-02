@@ -40,6 +40,7 @@ class SettingsViewModel(
             val enableBlur = repo.enableBlur
             val enableFloatingBottomBar = repo.enableFloatingBottomBar
             val enableFloatingBottomBarBlur = repo.enableFloatingBottomBarBlur
+            val showFloatingBottomBarLabels = repo.showFloatingBottomBarLabels
             val enableNavigationBadge = repo.enableNavigationBadge
             val hideSystemApps = repo.hideSystemApps
             val serviceDescriptionMaxLines = repo.serviceDescriptionMaxLines
@@ -59,6 +60,7 @@ class SettingsViewModel(
                     enableBlur = enableBlur,
                     enableFloatingBottomBar = enableFloatingBottomBar,
                     enableFloatingBottomBarBlur = enableFloatingBottomBarBlur,
+                    showFloatingBottomBarLabels = showFloatingBottomBarLabels,
                     enableNavigationBadge = enableNavigationBadge,
                     hideSystemApps = hideSystemApps,
                     serviceDescriptionMaxLines = serviceDescriptionMaxLines,
@@ -167,6 +169,11 @@ class SettingsViewModel(
     fun setEnableFloatingBottomBarBlur(enabled: Boolean) {
         repo.enableFloatingBottomBarBlur = enabled
         _uiState.update { it.copy(enableFloatingBottomBarBlur = enabled) }
+    }
+
+    fun setShowFloatingBottomBarLabels(enabled: Boolean) {
+        repo.showFloatingBottomBarLabels = enabled
+        _uiState.update { it.copy(showFloatingBottomBarLabels = enabled) }
     }
 
     fun setEnableNavigationBadge(enabled: Boolean) {

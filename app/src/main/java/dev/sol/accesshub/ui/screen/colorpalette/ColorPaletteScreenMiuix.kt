@@ -69,6 +69,7 @@ import dev.sol.accesshub.ui.theme.keyColorOptions
 import dev.sol.accesshub.ui.util.BlurredBar
 import dev.sol.accesshub.ui.util.rememberBlurBackdrop
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -396,7 +397,10 @@ fun ColorPaletteScreenMiuix(
                         var linesValue by remember(uiState.serviceDescriptionMaxLines) {
                             mutableFloatStateOf(uiState.serviceDescriptionMaxLines.toFloat())
                         }
-                        ArrowPreference(
+                        // BasicComponent, like upstream: ArrowPreference puts the summary and the
+                        // endActions value on one unweighted row, so a long summary and the value
+                        // ended up sharing a single text flow.
+                        BasicComponent(
                             title = stringResource(id = R.string.settings_service_description_max_lines),
                             summary = stringResource(id = R.string.settings_service_description_max_lines_summary),
                             startAction = {
@@ -418,7 +422,6 @@ fun ColorPaletteScreenMiuix(
                                     color = colorScheme.onSurfaceVariantActions,
                                 )
                             },
-                            onClick = { },
                             bottomAction = {
                                 Slider(
                                     value = linesValue,

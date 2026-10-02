@@ -130,3 +130,6 @@ val LocalEnableNavigationBadge = staticCompositionLocalOf { true }
 val LocalEnableFloatingBottomBar = staticCompositionLocalOf { false }
 
 val LocalEnableFloatingBottomBarBlur = staticCompositionLocalOf { false }
+
+/** Whether the floating bottom bar prints a label under each icon. */
+val LocalShowFloatingBottomBarLabels = staticCompositionLocalOf { false }

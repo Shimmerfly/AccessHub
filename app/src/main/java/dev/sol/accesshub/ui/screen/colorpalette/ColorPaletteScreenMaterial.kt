@@ -4,6 +4,11 @@ import android.annotation.SuppressLint
 import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -41,6 +46,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Android
+import androidx.compose.material.icons.automirrored.filled.Label
+import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.MenuOpen
 import androidx.compose.material.icons.filled.Brightness1
@@ -317,6 +324,38 @@ fun ColorPaletteScreenMaterial(
                         },
                         {
                             SegmentedSwitchItem(
+                                icon = Icons.Filled.Smartphone,
+                                title = stringResource(id = R.string.settings_floating_bottom_bar),
+                                summary = stringResource(id = R.string.settings_floating_bottom_bar_summary),
+                                checked = uiState.enableFloatingBottomBar,
+                                onCheckedChange = actions.onSetEnableFloatingBottomBar
+                            )
+                        },
+                        {
+                            // Only meaningful while the floating bar is on, so it slides in with it
+                            // instead of popping the rows below it around.
+                            Column {
+                                AnimatedVisibility(
+                                    visible = uiState.enableFloatingBottomBar,
+                                    enter = expandVertically(
+                                        animationSpec = tween(260, easing = LinearOutSlowInEasing)
+                                    ) + fadeIn(animationSpec = tween(200)),
+                                    exit = shrinkVertically(
+                                        animationSpec = tween(200, easing = FastOutLinearInEasing)
+                                    ) + fadeOut(animationSpec = tween(150)),
+                                ) {
+                                    SegmentedSwitchItem(
+                                        icon = Icons.AutoMirrored.Filled.Label,
+                                        title = stringResource(id = R.string.settings_floating_bottom_bar_labels),
+                                        summary = stringResource(id = R.string.settings_floating_bottom_bar_labels_summary),
+                                        checked = uiState.showFloatingBottomBarLabels,
+                                        onCheckedChange = actions.onSetShowFloatingBottomBarLabels
+                                    )
+                                }
+                            }
+                        },
+                        {
+                            SegmentedSwitchItem(
                                 icon = Icons.Filled.Android,
                                 title = stringResource(id = R.string.settings_hide_system_apps),
                                 summary = stringResource(id = R.string.settings_hide_system_apps_summary),
@@ -569,15 +608,18 @@ private fun ColorButtonMaterial(
     // Upstream's approach: every visible swatch generates its own palette, so the row is correct on
     // the very first frame and only the handful of composed items pay for it. The wallpaper entry
     // already runs inside the app's own dynamic scheme, so it needs no generation at all.
-    val scheme = colorSchemes[color] ?: if (color == Color.Unspecified) {
+    // Deliberately ignores the deferred map: it is seeded with placeholder palettes and only refines
+    // them over the next second, which made the row sit grey before snapping to the real colours.
+    // The cache means only the first visit ever pays for a generation.
+    val scheme = if (color == Color.Unspecified) {
         MaterialTheme.colorScheme
     } else {
         remember(color, isDark, isAmoled, paletteStyle, colorSpec) {
             cachedColorScheme(
-            color = color,
-            isDark = isDark,
-            isAmoled = isAmoled,
-            style = paletteStyle,
+                color = color,
+                isDark = isDark,
+                isAmoled = isAmoled,
+                style = paletteStyle,
                 specVersion = colorSpec,
             )
         }
