@@ -2,25 +2,67 @@ name: Android CI
 
 on:
   push:
-    branches: [ "AccessHub" ]
+    branches:
+      - '**'
   pull_request:
-    branches: [ "AccessHub" ]
+    branches:
+      - '**'
+  workflow_dispatch:
+
+concurrency:
+  group: android-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   build:
-
+    name: Lint, test and build
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: gradle
+      - name: Check out source
+        uses: actions/checkout@v4
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-    - name: Build with Gradle
-      run: ./gradlew build
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platforms;android-37" "build-tools;37.0.0"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for Gradle wrapper
+        run: chmod +x ./gradlew
+
+      - name: Run lint, unit tests and builds
+        run: >-
+          ./gradlew
+          --no-daemon
+          --stacktrace
+          :app:lintDebug
+          :app:testDebugUnitTest
+          :app:assembleDebug
+          :app:assembleRelease
+
+      - name: Upload APKs
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: accesshub-apks-${{ github.sha }}
+          path: app/build/outputs/apk/**/*.apk
+          if-no-files-found: error
+          retention-days: 14
