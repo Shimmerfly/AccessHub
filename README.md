@@ -40,37 +40,6 @@ AccessHub 是一个通过 **[Shizuku](https://shizuku.rikka.app/) / [Sui](https:
 
 [![Architecture diagram of shimmerfly/accesshub](https://gitdiagram.com/shimmerfly/accesshub/diagram.png)](https://gitdiagram.com/shimmerfly/accesshub?utm_source=readme&utm_medium=picture)
 
-
-```stucture
-app/src/main/
-├── aidl/dev/sol/accesshub/shizuku/
-│   └── IShellService.aidl              # 特权进程里的执行器接口（exec / destroy）
-├── java/dev/sol/accesshub/
-│   ├── AccessHubApp.kt                 # Application：初始化 Shizuku 监听、网络客户端
-│   ├── data/
-│   │   ├── ServiceMeta.kt              # 无障碍服务数据模型
-│   │   └── repository/
-│   │       ├── AccessibilityRepository.kt  # 枚举服务、读取与写入启用集合
-│   │       └── SettingsRepository*.kt      # 设置项持久化
-│   ├── permission/                     # 运行时权限（通知 / 存储 / 电池白名单…）
-│   ├── shizuku/
-│   │   ├── ShizukuStatus.kt            # 状态模型 + 提供方（Shizuku / Sui）
-│   │   ├── ShizukuManager.kt           # binder / 授权监听，暴露 StateFlow
-│   │   ├── ShizukuShell.kt             # 绑定 UserService 并执行 shell
-│   │   └── ShellUserService.kt         # 跑在 shell(uid 2000) 里的实现
-│   └── ui/
-│       ├── MainActivity.kt             # 入口：三页 Pager + 底栏 / 侧栏
-│       ├── navigation3/                # Navigation 3 路由与 Navigator
-│       ├── screen/
-│       │   ├── home/                   # 主页：KSU 风格状态页（Miuix / Material 双实现）
-│       │   ├── accessibility/          # 服务页：列表 + 开关（双实现）
-│       │   ├── settings/               # 设置页
-│       │   ├── about/ colorpalette/ permission/
-│       ├── component/                  # 底栏、对话框、miuix / material 组件、模糊与液态玻璃
-│       ├── theme/ util/ viewmodel/
-└── res/                                # 字符串（中 / 英）、主题、图标、多语言资源
-```
-
 ---
 
 ## Star History
