@@ -40,6 +40,7 @@ jobs:
           SDKMANAGER_DIR="$(dirname "$(find "${ANDROID_HOME}/cmdline-tools" -type f -name sdkmanager -print -quit)")"
           test -x "${SDKMANAGER_DIR}/sdkmanager"
           echo "Using sdkmanager from ${SDKMANAGER_DIR}"
+          export PATH="${SDKMANAGER_DIR}:${PATH}"
           echo "${SDKMANAGER_DIR}" >> "${GITHUB_PATH}"
           sdkmanager --version
           yes | sdkmanager --licenses >/dev/null || true
