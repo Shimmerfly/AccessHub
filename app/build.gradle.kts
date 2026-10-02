@@ -18,10 +18,15 @@ val gitHash = providers.exec {
     commandLine("git", "rev-parse", "--short=7", "HEAD")
 }.standardOutput.asText.map { it.trim() }
 
+// GitHub-hosted runners may lag behind the latest Android SDK platform. CI can
+// override these values without changing the local/release defaults.
+val compileSdkVersion = providers.gradleProperty("ci.compileSdk").map { it.toInt() }.orElse(37)
+val targetSdkVersion = providers.gradleProperty("ci.targetSdk").map { it.toInt() }.orElse(37)
+
 android {
     namespace = "dev.sol.accesshub"
     compileSdk {
-        version = release(37) {
+        version = release(compileSdkVersion.get()) {
             minorApiLevel = 0
         }
     }
@@ -29,7 +34,7 @@ android {
     defaultConfig {
         applicationId = "dev.sol.accesshub"
         minSdk = 24
-        targetSdk = 37
+        targetSdk = targetSdkVersion.get()
         // Placeholders only; the git stamp below overrides them for every variant.
         versionCode = 1
         versionName = "1.0.0"
