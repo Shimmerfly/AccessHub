@@ -14,6 +14,11 @@ import dev.sol.accesshub.shizuku.ShizukuManager
 import dev.sol.accesshub.ui.LocalUiMode
 import dev.sol.accesshub.ui.UiMode
 import dev.sol.accesshub.ui.viewmodel.AccessibilityViewModel
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.res.stringResource
+import dev.sol.accesshub.ui.component.dialog.rememberConfirmDialog
+import dev.sol.accesshub.R
 
 @Composable
 fun AccessibilityPager(
@@ -29,7 +34,13 @@ fun AccessibilityPager(
     // `serviceDescriptionMaxLines` while this page stays composed inside the pager, so the old
     // one-shot activation guard kept the rows on the stale line count.
     LaunchedEffect(isCurrentPage) {
-        if (isCurrentPage) viewModel.refresh()
+        if (isCurrentPage) viewModel.refresh() else viewModel.collapseDescriptions()
+    }
+
+    // Fold the descriptions the moment this page goes away, not on the way back in: pushing the
+    // theme screen disposes this composition without the pager flag ever turning false.
+    DisposableEffect(Unit) {
+        onDispose { viewModel.collapseDescriptions() }
     }
 
     // Coming back from the system accessibility settings must re-read the enabled set.
@@ -41,8 +52,37 @@ fun AccessibilityPager(
         onPauseOrDispose { }
     }
 
+    // TalkBack rewrites how the whole system reacts to input, so enabling it asks for confirmation.
+    val pendingTalkBack = remember { mutableStateOf<String?>(null) }
+    val talkBackTitle = stringResource(R.string.accessibility_talkback_warning_title)
+    val talkBackMessage = stringResource(R.string.accessibility_talkback_warning)
+    val talkBackConfirm = stringResource(R.string.accessibility_talkback_enable_anyway)
+    val confirmDialog = rememberConfirmDialog(
+        onConfirm = {
+            pendingTalkBack.value?.let { viewModel.setEnabled(it, true) }
+            pendingTalkBack.value = null
+        },
+        onDismiss = { pendingTalkBack.value = null },
+    )
+
     val actions = AccessibilityActions(
-        onToggle = viewModel::setEnabled,
+        onToggle = { id, enabled ->
+            if (enabled && id.contains("talkback", ignoreCase = true)) {
+                pendingTalkBack.value = id
+                confirmDialog.showConfirm(
+                    title = talkBackTitle,
+                    content = talkBackMessage,
+                    markdown = false,
+                    html = false,
+                    confirm = talkBackConfirm,
+                    dismiss = null,
+                    isWarning = true,
+                )
+            } else {
+                viewModel.setEnabled(id, enabled)
+            }
+        },
+        onToggleDescription = viewModel::toggleDescription,
         onRefresh = viewModel::refresh,
         onRequestShizukuPermission = { ShizukuManager.requestPermission() },
         onDismissError = viewModel::dismissError,

@@ -1,6 +1,7 @@
 package dev.sol.accesshub.ui.screen.accessibility
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -87,6 +88,10 @@ fun AccessibilityPagerMiuix(
     // the system-app section flash after the switch was toggled on the theme page. Read it straight
     // from the settings store instead: this page is recomposed from scratch whenever it is re-entered.
     val hideSystemApps = remember { SettingsRepositoryImpl().hideSystemApps }
+    // The ViewModel's copy only lands after its async refresh, so read the clamp straight from the
+    // settings store as well: a slider change must apply the moment the page is composed again.
+    val descriptionMaxLines = remember { SettingsRepositoryImpl().serviceDescriptionMaxLines }
+        .let { if (it >= 10) Int.MAX_VALUE else it }
 
     var systemAppsExpanded by rememberSaveable { mutableStateOf(false) }
 
@@ -146,7 +151,9 @@ fun AccessibilityPagerMiuix(
                             service = service,
                             enabled = service.id in state.enabledIds,
                             writable = state.writable,
-                            descriptionMaxLines = state.serviceDescriptionMaxLines,
+                            descriptionMaxLines = descriptionMaxLines,
+                            expanded = service.id in state.expandedDescriptionIds,
+                            onToggleDescription = { actions.onToggleDescription(service.id) },
                             onToggle = { actions.onToggle(service.id, it) },
                         )
                     }
@@ -214,7 +221,9 @@ fun AccessibilityPagerMiuix(
                             service = service,
                             enabled = service.id in state.enabledIds,
                             writable = state.writable,
-                            descriptionMaxLines = state.serviceDescriptionMaxLines,
+                            descriptionMaxLines = descriptionMaxLines,
+                            expanded = service.id in state.expandedDescriptionIds,
+                            onToggleDescription = { actions.onToggleDescription(service.id) },
                             onToggle = { actions.onToggle(service.id, it) },
                         )
                     }
@@ -260,7 +269,9 @@ fun AccessibilityPagerMiuix(
                                                 service = service,
                                                 enabled = service.id in state.enabledIds,
                                                 writable = state.writable,
-                                                descriptionMaxLines = state.serviceDescriptionMaxLines,
+                                                descriptionMaxLines = descriptionMaxLines,
+                                                expanded = service.id in state.expandedDescriptionIds,
+                                                onToggleDescription = { actions.onToggleDescription(service.id) },
                                                 onToggle = { actions.onToggle(service.id, it) },
                                             )
                                         }
@@ -284,10 +295,11 @@ private fun ServiceCard(
     enabled: Boolean,
     writable: Boolean,
     descriptionMaxLines: Int,
+    expanded: Boolean,
+    onToggleDescription: () -> Unit,
     onToggle: (Boolean) -> Unit,
 ) {
     val description = service.description
-    var expanded by rememberSaveable(service.id) { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -297,7 +309,6 @@ private fun ServiceCard(
     ) {
         BasicComponent(
             title = service.label,
-            summary = service.pkg,
             startAction = {
                 service.icon?.let { icon ->
                     Image(
@@ -316,22 +327,21 @@ private fun ServiceCard(
                     enabled = writable,
                 )
             },
-            onClick = { expanded = !expanded },
+            onClick = { onToggleDescription() },
         )
-        // Expanded by this card's Column instead of the component's bottomAction slot, so the
-        // description is really laid out up to `descriptionMaxLines` lines inside the same card.
-        AnimatedVisibility(visible = expanded) {
-            Text(
-                text = description ?: stringResource(R.string.accessibility_no_description),
-                fontSize = 14.sp,
-                color = colorScheme.onSurfaceVariantSummary,
-                maxLines = descriptionMaxLines,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    // Indent under the title: 16.dp card padding + 52.dp icon + 8.dp gap.
-                    .padding(start = 76.dp, end = 16.dp, bottom = 12.dp),
-            )
-        }
+        // Upstream's semantics: the description is always visible but folded to
+        // `descriptionMaxLines`, and tapping the card unfolds the rest.
+        Text(
+            text = description ?: stringResource(R.string.accessibility_no_description),
+            fontSize = 14.sp,
+            color = colorScheme.onSurfaceVariantSummary,
+            maxLines = if (expanded) Int.MAX_VALUE else descriptionMaxLines,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .fillMaxWidth()
+                .animateContentSize()
+                // Indent under the title: 16.dp card padding + 52.dp icon + 8.dp gap.
+                .padding(start = 76.dp, end = 16.dp, bottom = 12.dp),
+        )
     }
 }

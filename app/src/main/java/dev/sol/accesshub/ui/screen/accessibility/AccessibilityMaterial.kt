@@ -1,6 +1,7 @@
 package dev.sol.accesshub.ui.screen.accessibility
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -73,6 +74,10 @@ fun AccessibilityPagerMaterial(
     // the system-app section flash after the switch was toggled on the theme page. Read it straight
     // from the settings store instead: this page is recomposed from scratch whenever it is re-entered.
     val hideSystemApps = remember { SettingsRepositoryImpl().hideSystemApps }
+    // The ViewModel's copy only lands after its async refresh, so read the clamp straight from the
+    // settings store as well: a slider change must apply the moment the page is composed again.
+    val descriptionMaxLines = remember { SettingsRepositoryImpl().serviceDescriptionMaxLines }
+        .let { if (it >= 10) Int.MAX_VALUE else it }
 
     var systemAppsExpanded by rememberSaveable { mutableStateOf(false) }
 
@@ -112,7 +117,9 @@ fun AccessibilityPagerMaterial(
                                     service = service,
                                     enabled = service.id in state.enabledIds,
                                     writable = state.writable,
-                                    descriptionMaxLines = state.serviceDescriptionMaxLines,
+                                    descriptionMaxLines = descriptionMaxLines,
+                                    expanded = service.id in state.expandedDescriptionIds,
+                                    onToggleDescription = { actions.onToggleDescription(service.id) },
                                     onToggle = { actions.onToggle(service.id, it) },
                                 )
                             }
@@ -169,7 +176,9 @@ fun AccessibilityPagerMaterial(
                         service = service,
                         enabled = service.id in state.enabledIds,
                         writable = state.writable,
-                        descriptionMaxLines = state.serviceDescriptionMaxLines,
+                        descriptionMaxLines = descriptionMaxLines,
+                        expanded = service.id in state.expandedDescriptionIds,
+                        onToggleDescription = { actions.onToggleDescription(service.id) },
                         onToggle = { actions.onToggle(service.id, it) },
                     )
                 }
@@ -199,7 +208,9 @@ fun AccessibilityPagerMaterial(
                                             service = service,
                                             enabled = service.id in state.enabledIds,
                                             writable = state.writable,
-                                            descriptionMaxLines = state.serviceDescriptionMaxLines,
+                                            descriptionMaxLines = descriptionMaxLines,
+                                            expanded = service.id in state.expandedDescriptionIds,
+                                            onToggleDescription = { actions.onToggleDescription(service.id) },
                                             onToggle = { actions.onToggle(service.id, it) },
                                         )
                                     }
@@ -324,16 +335,17 @@ private fun ServiceRow(
     enabled: Boolean,
     writable: Boolean,
     descriptionMaxLines: Int,
+    expanded: Boolean,
+    onToggleDescription: () -> Unit,
     onToggle: (Boolean) -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
-    var expanded by rememberSaveable(service.id) { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         SegmentedListItem(
             onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
-                expanded = !expanded
+                onToggleDescription()
             },
             headlineContent = {
                 Text(
@@ -343,11 +355,17 @@ private fun ServiceRow(
                 )
             },
             supportingContent = {
+                // No style override: the description inherits the slot's own typography, which is the
+                // size the package name used to have, and it shares the container colour.
                 Text(
-                    text = service.pkg,
+                    text = service.description
+                        ?: stringResource(R.string.accessibility_no_description),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
+                    maxLines = if (expanded) Int.MAX_VALUE else descriptionMaxLines,
                     overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .animateContentSize(),
                 )
             },
             leadingContent = {
@@ -370,22 +388,5 @@ private fun ServiceRow(
                 )
             },
         )
-        // Expanded by this Column instead of inside a list item content slot, so the description
-        // is really laid out up to `descriptionMaxLines` lines. Material's own ListItem expansion
-        // sample renders expanded content next to the row the same way.
-        AnimatedVisibility(visible = expanded) {
-            Text(
-                text = service.description
-                    ?: stringResource(R.string.accessibility_no_description),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodySmall,
-                maxLines = descriptionMaxLines,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    // Indent under the headline: 16.dp item padding + 40.dp icon + 12.dp gap.
-                    .padding(start = 68.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
-            )
-        }
     }
 }

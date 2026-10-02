@@ -18,12 +18,15 @@ data class AccessibilityUiState(
     val hideSystemApps: Boolean = false,
     /** How many lines of an expanded service description to show (settings-driven). */
     val serviceDescriptionMaxLines: Int = 4,
+    /** Services whose description is currently unfolded. Cleared whenever the page is re-entered. */
+    val expandedDescriptionIds: Set<String> = emptySet(),
     val searchStatus: SearchStatus = SearchStatus(""),
 )
 
 @Immutable
 data class AccessibilityActions(
     val onToggle: (String, Boolean) -> Unit = { _, _ -> },
+    val onToggleDescription: (String) -> Unit = {},
     val onRefresh: () -> Unit = {},
     val onRequestShizukuPermission: () -> Unit = {},
     val onDismissError: () -> Unit = {},

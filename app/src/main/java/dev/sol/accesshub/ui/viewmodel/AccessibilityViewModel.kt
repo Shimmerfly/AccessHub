@@ -17,6 +17,7 @@ import dev.sol.accesshub.data.repository.SettingsRepositoryImpl
 import dev.sol.accesshub.shizuku.ShizukuManager
 import dev.sol.accesshub.ui.component.SearchStatus
 import dev.sol.accesshub.ui.screen.accessibility.AccessibilityUiState
+import dev.sol.accesshub.data.repository.EnabledServicesCounter
 
 class AccessibilityViewModel(
     private val repository: AccessibilityRepository = AccessibilityRepository(accessHubApp),
@@ -45,6 +46,18 @@ class AccessibilityViewModel(
         }
         viewModelScope.launchSearchQueryCollector(searchQuery) { applySearchText(it) }
         refresh()
+    }
+
+    /** Folds every description back up. Called when the page becomes current again. */
+    fun collapseDescriptions() {
+        _uiState.update { it.copy(expandedDescriptionIds = emptySet()) }
+    }
+
+    fun toggleDescription(id: String) {
+        _uiState.update { current ->
+            val ids = current.expandedDescriptionIds
+            current.copy(expandedDescriptionIds = if (id in ids) ids - id else ids + id)
+        }
     }
 
     fun refresh() {
@@ -88,10 +101,13 @@ class AccessibilityViewModel(
         val before = _uiState.value.enabledIds
         val next = if (enabled) before + id else before - id
         _uiState.update { it.copy(enabledIds = next, error = null) }
+        // Publish straight away so the navigation badge follows the switch without a tab switch.
+        EnabledServicesCounter.publish(next.size)
         viewModelScope.launch {
             val result = repository.writeEnabled(next)
             if (!result.success) {
                 _uiState.update { it.copy(enabledIds = before, error = result.errorMessage) }
+                EnabledServicesCounter.publish(before.size)
             }
         }
     }
