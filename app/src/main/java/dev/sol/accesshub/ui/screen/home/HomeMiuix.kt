@@ -30,7 +30,6 @@ import androidx.compose.material.icons.filled.Accessibility
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Fingerprint
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.rounded.CheckCircleOutline
@@ -466,21 +465,6 @@ private fun SupportLinks(actions: HomeActions) {
                 )
             },
             onClick = { actions.onOpenUrl(shizukuUrl) },
-            holdDownState = false,
-            enabled = true,
-        )
-        ArrowPreference(
-            title = stringResource(R.string.home_link_permissions_title),
-            summary = stringResource(R.string.home_link_permissions_summary),
-            startAction = {
-                Icon(
-                    imageVector = Icons.Filled.Security,
-                    contentDescription = stringResource(R.string.home_link_permissions_title),
-                    modifier = Modifier.padding(end = 6.dp),
-                    tint = colorScheme.onBackground,
-                )
-            },
-            onClick = actions.onPermissionsClick,
             holdDownState = false,
             enabled = true,
         )
