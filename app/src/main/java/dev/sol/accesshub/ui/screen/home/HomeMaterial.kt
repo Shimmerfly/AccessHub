@@ -24,8 +24,6 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Accessibility
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Fingerprint
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.rounded.CheckCircle
@@ -248,17 +246,7 @@ private fun StatusCard(
             },
             headlineContent = { Text(text = title, style = MaterialTheme.typography.titleMedium) },
             supportingContent = { Text(text = summary, style = MaterialTheme.typography.bodyMedium) },
-            trailingContent = if (ready) {
-                {
-                    Text(
-                        text = stringResource(
-                            if (state.shizuku.isRoot) R.string.home_shizuku_mode_root
-                            else R.string.home_shizuku_mode_adb
-                        ),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                }
-            } else null,
+            trailingContent = null,
             colors = ListItemDefaults.colors(
                 containerColor = Color.Transparent,
                 contentColor = contentColor,
@@ -313,7 +301,8 @@ private fun InfoCard(state: HomeUiState) {
     }
 
     val shizukuContent = if (state.shizuku.isRunning) {
-        stringResource(R.string.home_shizuku_value, state.shizuku.version, state.shizuku.uid)
+        stringResource(R.string.home_shizuku_value, state.shizuku.version, state.shizuku.uid) +
+            if (state.shizuku.isRoot) " · " + stringResource(R.string.home_shizuku_mode_root) else ""
     } else {
         stringResource(R.string.home_shizuku_unavailable)
     }
@@ -348,9 +337,11 @@ private fun InfoCard(state: HomeUiState) {
                 },
                 {
                     InfoCardItem(
-                        icon = Icons.Filled.Fingerprint,
-                        label = stringResource(R.string.home_fingerprint),
-                        content = state.systemInfo.fingerprint,
+                        icon = Icons.Filled.Code,
+                        label = state.shizuku.provider.displayName.ifEmpty {
+                            stringResource(R.string.home_shizuku_or_sui)
+                        },
+                        content = shizukuContent,
                     )
                 },
             )
@@ -367,15 +358,6 @@ private fun InfoCard(state: HomeUiState) {
                             state.accessibility.enabledCount,
                             state.accessibility.installedCount,
                         ),
-                    )
-                },
-                {
-                    InfoCardItem(
-                        icon = Icons.Filled.Code,
-                        label = state.shizuku.provider.displayName.ifEmpty {
-                            stringResource(R.string.home_shizuku_or_sui)
-                        },
-                        content = shizukuContent,
                     )
                 },
             )
@@ -416,20 +398,6 @@ private fun SupportLinks(actions: HomeActions) {
                         Icon(
                             Icons.AutoMirrored.Filled.MenuBook,
                             stringResource(R.string.home_link_shizuku_title)
-                        )
-                    },
-                    trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null) },
-                )
-            },
-            {
-                SegmentedListItem(
-                    onClick = actions.onPermissionsClick,
-                    headlineContent = { Text(stringResource(R.string.home_link_permissions_title)) },
-                    supportingContent = { Text(stringResource(R.string.home_link_permissions_summary)) },
-                    leadingContent = {
-                        Icon(
-                            Icons.Filled.Security,
-                            stringResource(R.string.home_link_permissions_title)
                         )
                     },
                     trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null) },

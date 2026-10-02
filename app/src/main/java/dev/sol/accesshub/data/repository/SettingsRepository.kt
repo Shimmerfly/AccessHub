@@ -12,5 +12,8 @@ interface SettingsRepository {
     var enableBlur: Boolean
     var enableFloatingBottomBar: Boolean
     var enableFloatingBottomBarBlur: Boolean
+    var enableNavigationBadge: Boolean
+    var hideSystemApps: Boolean
+    var serviceDescriptionMaxLines: Int
     var pageScale: Float
 }

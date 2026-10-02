@@ -56,10 +56,12 @@ class Navigator(
 
 
     /**
-     * Pop the top key if present.
+     * Pop the top key. The first entry stays, so the back stack is never left empty.
      */
     fun pop() {
-        backStack.removeLastOrNull()
+        if (backStack.size > 1) {
+            backStack.removeLastOrNull()
+        }
     }
 
     /**

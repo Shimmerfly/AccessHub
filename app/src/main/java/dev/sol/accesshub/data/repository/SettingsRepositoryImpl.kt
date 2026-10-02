@@ -57,6 +57,19 @@ class SettingsRepositoryImpl : SettingsRepository {
         get() = prefs.getBoolean("enable_floating_bottom_bar_blur", true)
         set(value) = prefs.edit { putBoolean("enable_floating_bottom_bar_blur", value) }
 
+    override var enableNavigationBadge: Boolean
+        get() = prefs.getBoolean("enable_navigation_badge", true)
+        set(value) = prefs.edit { putBoolean("enable_navigation_badge", value) }
+
+    override var hideSystemApps: Boolean
+        get() = prefs.getBoolean("hide_system_apps", false)
+        set(value) = prefs.edit { putBoolean("hide_system_apps", value) }
+
+    override var serviceDescriptionMaxLines: Int
+        get() = prefs.getInt("service_description_max_lines", 4)
+        // 10 means "show everything"; the UI state turns it into Int.MAX_VALUE.
+        set(value) = prefs.edit { putInt("service_description_max_lines", value.coerceIn(1, 10)) }
+
     override var pageScale: Float
         get() = prefs.getFloat("page_scale", 1.0f)
         set(value) = prefs.edit { putFloat("page_scale", value) }

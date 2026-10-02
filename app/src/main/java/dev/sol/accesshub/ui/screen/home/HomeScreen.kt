@@ -17,7 +17,6 @@ import dev.sol.accesshub.shizuku.ShizukuManager
 import dev.sol.accesshub.ui.LocalUiMode
 import dev.sol.accesshub.ui.UiMode
 import dev.sol.accesshub.ui.navigation3.Navigator
-import dev.sol.accesshub.ui.navigation3.Route
 import dev.sol.accesshub.ui.viewmodel.HomeViewModel
 
 @Composable
@@ -54,7 +53,6 @@ fun HomePager(
         onOpenUrl = uriHandler::openUri,
         onRequestShizukuPermission = { ShizukuManager.requestPermission() },
         onOpenShizuku = { ShizukuManager.launchManager(context) },
-        onPermissionsClick = { navigator.push(Route.Permissions) },
     )
 
     when (LocalUiMode.current) {

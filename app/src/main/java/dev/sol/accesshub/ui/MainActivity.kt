@@ -29,6 +29,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,6 +41,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -51,8 +53,11 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.flow.MutableStateFlow
 import dev.sol.accesshub.R
+import dev.sol.accesshub.accessHubApp
+import dev.sol.accesshub.data.repository.AccessibilityRepository
 import dev.sol.accesshub.ui.component.bottombar.BottomBar
 import dev.sol.accesshub.ui.component.bottombar.MainPagerState
+import dev.sol.accesshub.ui.component.bottombar.NavigationBadgeState
 import dev.sol.accesshub.ui.component.bottombar.SideRail
 import dev.sol.accesshub.ui.component.bottombar.rememberMainPagerState
 import dev.sol.accesshub.ui.navigation3.LocalNavigator
@@ -63,13 +68,13 @@ import dev.sol.accesshub.ui.screen.about.AboutScreen
 import dev.sol.accesshub.ui.screen.accessibility.AccessibilityPager
 import dev.sol.accesshub.ui.screen.colorpalette.ColorPaletteScreen
 import dev.sol.accesshub.ui.screen.home.HomePager
-import dev.sol.accesshub.ui.screen.permission.PermissionScreen
 import dev.sol.accesshub.ui.screen.settings.SettingPager
 import dev.sol.accesshub.ui.theme.AccessHubTheme
 import dev.sol.accesshub.ui.theme.LocalColorMode
 import dev.sol.accesshub.ui.theme.LocalEnableBlur
 import dev.sol.accesshub.ui.theme.LocalEnableFloatingBottomBar
 import dev.sol.accesshub.ui.theme.LocalEnableFloatingBottomBarBlur
+import dev.sol.accesshub.ui.theme.LocalEnableNavigationBadge
 import dev.sol.accesshub.ui.util.rememberBlurBackdrop
 import dev.sol.accesshub.ui.util.rememberContentReady
 import dev.sol.accesshub.ui.viewmodel.MainActivityViewModel
@@ -121,6 +126,7 @@ class MainActivity : ComponentActivity() {
                 LocalDensity provides density,
                 LocalColorMode provides appSettings.colorMode.value,
                 LocalEnableBlur provides uiState.enableBlur,
+                LocalEnableNavigationBadge provides uiState.enableNavigationBadge,
                 LocalEnableFloatingBottomBar provides uiState.enableFloatingBottomBar,
                 LocalEnableFloatingBottomBarBlur provides uiState.enableFloatingBottomBarBlur,
                 LocalUiMode provides uiMode,
@@ -147,7 +153,6 @@ class MainActivity : ComponentActivity() {
                                 entry<Route.Main> { mainScreenEntry() }
                                 entry<Route.About> { AboutScreen() }
                                 entry<Route.ColorPalette> { ColorPaletteScreen() }
-                                entry<Route.Permissions> { PermissionScreen() }
                                 entry<Route.Home> { mainScreenEntry() }
                                 entry<Route.Settings> { mainScreenEntry() }
                             }
@@ -181,6 +186,7 @@ fun MainScreen(
 ) {
     val navController = LocalNavigator.current
     val enableBlur = LocalEnableBlur.current
+    val enableNavigationBadge = LocalEnableNavigationBadge.current
     val enableFloatingBottomBar = LocalEnableFloatingBottomBar.current
     val enableFloatingBottomBarBlur = LocalEnableFloatingBottomBarBlur.current
     val pagerState = rememberPagerState(initialPage = initialPage, pageCount = { MainPagerConfig.PAGE_COUNT })
@@ -192,6 +198,28 @@ fun MainScreen(
         UiMode.Miuix -> MiuixTheme.colorScheme.surface
     }
     val blurBackdrop = rememberBlurBackdrop(enableBlur)
+
+    // The enabled set is a cheap Settings.Secure read, but it changes outside the app (and from the
+    // Services page), so read it whenever this screen enters the composition or the page changes.
+    // A resume effect alone is not enough: when the theme toggle brings this screen back, the
+    // composition starts after the host is already resumed, so that ON_RESUME never arrives.
+    var enabledServiceCount by remember { mutableIntStateOf(0) }
+    LaunchedEffect(enableNavigationBadge, mainPagerState.pagerState.settledPage) {
+        enabledServiceCount = if (enableNavigationBadge) {
+            AccessibilityRepository(accessHubApp).readEnabled().services.size
+        } else {
+            0
+        }
+    }
+    LifecycleResumeEffect(enableNavigationBadge) {
+        enabledServiceCount = if (enableNavigationBadge) {
+            AccessibilityRepository(accessHubApp).readEnabled().services.size
+        } else {
+            0
+        }
+        onPauseOrDispose { }
+    }
+    val navigationBadge = NavigationBadgeState(enabledServiceCount = enabledServiceCount)
 
     val backdrop = rememberLayerBackdrop {
         drawRect(surfaceColor)
@@ -246,6 +274,7 @@ fun MainScreen(
                     Row {
                         SideRail(
                             blurBackdrop = blurBackdrop,
+                            navigationBadge = navigationBadge,
                         )
                         Box(
                             modifier = Modifier
@@ -261,6 +290,7 @@ fun MainScreen(
                     Row {
                         SideRail(
                             blurBackdrop = blurBackdrop,
+                            navigationBadge = navigationBadge,
                         )
                         Box(
                             modifier = Modifier
@@ -280,6 +310,7 @@ fun MainScreen(
                     BottomBar(
                         blurBackdrop = blurBackdrop,
                         backdrop = backdrop,
+                        navigationBadge = navigationBadge,
                         modifier = Modifier.align(Alignment.BottomCenter),
                     )
                 }

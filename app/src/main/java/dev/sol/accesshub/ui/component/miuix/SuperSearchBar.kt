@@ -107,6 +107,7 @@ fun SearchStatus.SearchBox(
 fun SearchStatus.SearchPager(
     onSearchStatusChange: (SearchStatus) -> Unit,
     defaultResult: @Composable () -> Unit,
+    emptyResult: @Composable () -> Unit = {},
     expandBar: @Composable (SearchStatus, (SearchStatus) -> Unit, Dp) -> Unit = { searchStatus, onStatusChange, padding ->
         SearchBar(searchStatus, onStatusChange, padding)
     },
@@ -214,7 +215,7 @@ fun SearchStatus.SearchPager(
         ) {
             when (searchStatus.resultStatus) {
                 SearchStatus.ResultStatus.DEFAULT -> defaultResult()
-                SearchStatus.ResultStatus.EMPTY -> {}
+                SearchStatus.ResultStatus.EMPTY -> emptyResult()
                 SearchStatus.ResultStatus.LOAD -> {}
                 SearchStatus.ResultStatus.SHOW -> result()
             }

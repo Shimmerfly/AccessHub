@@ -29,12 +29,15 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.automirrored.rounded.MenuOpen
 import androidx.compose.material.icons.rounded.AspectRatio
 import androidx.compose.material.icons.rounded.BlurOn
 import androidx.compose.material.icons.rounded.CallToAction
 import androidx.compose.material.icons.rounded.Colorize
+import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.DesignServices
+import androidx.compose.material.icons.rounded.Pin
 import androidx.compose.material.icons.rounded.Style
 import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material.icons.rounded.WaterDrop
@@ -59,7 +62,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
-import com.materialkolor.rememberDynamicColorScheme
 import dev.sol.accesshub.R
 import dev.sol.accesshub.ui.component.miuix.ScaleDialog
 import dev.sol.accesshub.ui.theme.LocalEnableBlur
@@ -357,6 +359,84 @@ fun ColorPaletteScreenMiuix(
                             )
                         }
 
+                        SwitchPreference(
+                            title = stringResource(id = R.string.settings_navigation_badge),
+                            summary = stringResource(id = R.string.settings_navigation_badge_summary),
+                            startAction = {
+                                Icon(
+                                    Icons.Rounded.Pin,
+                                    modifier = Modifier.padding(end = 6.dp),
+                                    contentDescription = stringResource(id = R.string.settings_navigation_badge),
+                                    tint = colorScheme.onBackground
+                                )
+                            },
+                            checked = uiState.enableNavigationBadge,
+                            onCheckedChange = {
+                                actions.onSetEnableNavigationBadge(it)
+                            }
+                        )
+
+                        SwitchPreference(
+                            title = stringResource(id = R.string.settings_hide_system_apps),
+                            summary = stringResource(id = R.string.settings_hide_system_apps_summary),
+                            startAction = {
+                                Icon(
+                                    Icons.Filled.Android,
+                                    modifier = Modifier.padding(end = 6.dp),
+                                    contentDescription = stringResource(id = R.string.settings_hide_system_apps),
+                                    tint = colorScheme.onBackground
+                                )
+                            },
+                            checked = uiState.hideSystemApps,
+                            onCheckedChange = {
+                                actions.onSetHideSystemApps(it)
+                            }
+                        )
+
+                        var linesValue by remember(uiState.serviceDescriptionMaxLines) {
+                            mutableFloatStateOf(uiState.serviceDescriptionMaxLines.toFloat())
+                        }
+                        ArrowPreference(
+                            title = stringResource(id = R.string.settings_service_description_max_lines),
+                            summary = stringResource(id = R.string.settings_service_description_max_lines_summary),
+                            startAction = {
+                                Icon(
+                                    Icons.Rounded.Description,
+                                    modifier = Modifier.padding(end = 6.dp),
+                                    contentDescription = stringResource(id = R.string.settings_service_description_max_lines),
+                                    tint = colorScheme.onBackground
+                                )
+                            },
+                            endActions = {
+                                Text(
+                                    // 10 is the "no truncation" end of the range and reads as "全部".
+                                    text = if (linesValue.toInt() >= 10) {
+                                        stringResource(R.string.settings_service_description_max_lines_all)
+                                    } else {
+                                        linesValue.toInt().toString()
+                                    },
+                                    color = colorScheme.onSurfaceVariantActions,
+                                )
+                            },
+                            onClick = { },
+                            bottomAction = {
+                                Slider(
+                                    value = linesValue,
+                                    onValueChange = {
+                                        linesValue = it
+                                    },
+                                    onValueChangeFinished = {
+                                        actions.onSetServiceDescriptionMaxLines(linesValue.toInt())
+                                    },
+                                    valueRange = 1f..10f,
+                                    showKeyPoints = true,
+                                    keyPoints = listOf(1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f, 9f, 10f),
+                                    magnetThreshold = 0.01f,
+                                    hapticEffect = SliderDefaults.SliderHapticEffect.Step,
+                                )
+                            },
+                        )
+
                         var sliderValue by remember(uiState.pageScale) { mutableFloatStateOf(uiState.pageScale) }
                         ArrowPreference(
                             title = stringResource(id = R.string.settings_page_scale),
@@ -437,23 +517,27 @@ private fun ThemePreviewCardMiuix(
     val seedColor = if (keyColor == 0) colorScheme.primary else Color(keyColor)
     val effectiveStyle = if (keyColor == 0) PaletteStyle.TonalSpot else paletteStyle
     val effectiveSpec = if (keyColor == 0) ColorSpec.SpecVersion.Default else colorSpec
-    val dynamicCs = rememberDynamicColorScheme(
+    // Generated off the main thread, so the page-enter transition never waits on palette math.
+    val dynamicCs = rememberDeferredColorScheme(
         seedColor = seedColor,
         isDark = isDark,
         style = effectiveStyle,
         specVersion = effectiveSpec,
     )
+    // Until that palette lands, stand in with the Miuix theme colours for the first frames.
+    val monet = if (miuixMonet) dynamicCs else null
 
-    val bgColor = if (miuixMonet) dynamicCs.background else colorScheme.surface
-    val textColor = if (miuixMonet) dynamicCs.onSurface else colorScheme.onBackground
+    val bgColor = monet?.background ?: colorScheme.surface
+    val textColor = monet?.onSurface ?: colorScheme.onBackground
     val accentCardColor = when {
-        miuixMonet -> dynamicCs.secondaryContainer
+        monet != null -> monet.secondaryContainer
+        miuixMonet -> colorScheme.surfaceVariant
         isDark -> Color(0xFF1A3825)
         else -> Color(0xFFDFFAE4)
     }
-    val cardColor = if (miuixMonet) dynamicCs.surfaceContainerHighest else colorScheme.surfaceVariant
-    val navBarColor = if (miuixMonet) dynamicCs.surfaceContainer else colorScheme.surface
-    val iconColor = if (miuixMonet) dynamicCs.primary else colorScheme.primary
+    val cardColor = monet?.surfaceContainerHighest ?: colorScheme.surfaceVariant
+    val navBarColor = monet?.surfaceContainer ?: colorScheme.surface
+    val iconColor = monet?.primary ?: colorScheme.primary
     val navSelectedColor = colorScheme.onSurfaceContainer
     val navUnselectedColor = colorScheme.onSurfaceContainer.copy(alpha = 0.5f)
 

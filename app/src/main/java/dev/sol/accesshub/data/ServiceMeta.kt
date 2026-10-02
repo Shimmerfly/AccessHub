@@ -14,6 +14,8 @@ data class ServiceMeta(
     val appName: String,
     val description: String?,
     val icon: ImageBitmap?,
+    /** True when the owning app ships with the system image, so the list can group it away. */
+    val isSystemApp: Boolean = false,
     /** Optional per-service settings activity, when the developer declared one. */
     val settingsActivity: String?,
 )
