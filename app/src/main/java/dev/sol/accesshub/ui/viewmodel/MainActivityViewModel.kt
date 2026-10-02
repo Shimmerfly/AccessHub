@@ -52,7 +52,9 @@ class MainActivityViewModel(
             enableFloatingBottomBar = settingRepo.enableFloatingBottomBar,
             enableFloatingBottomBarBlur = settingRepo.enableFloatingBottomBarBlur,
             showFloatingBottomBarLabels = settingRepo.showFloatingBottomBarLabels,
-            uiMode = UiMode.fromValue(settingRepo.uiMode),
+            // Forced to Material: the Miuix screens are still in the tree, but the UI style option
+            // is gone, so nothing can select them any more.
+            uiMode = UiMode.Material,
         )
     }
 
