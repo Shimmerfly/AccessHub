@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/icon.png" width="128" alt="AccessHub 图标">
+
 # AccessHub · 无障碍管家
 
 **用 Shizuku / Sui 一屏管理所有无障碍服务，不用再钻系统设置**
