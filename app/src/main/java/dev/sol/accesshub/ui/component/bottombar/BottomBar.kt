@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -84,25 +85,46 @@ fun rememberMainPagerState(
     }
 }
 
+/** Counts the bars can badge; the UI reads them, the destinations decide what to show. */
+@Immutable
+data class NavigationBadgeState(
+    val enabledServiceCount: Int = 0,
+)
+
+internal enum class BadgeTone { Alert, Accent }
+
+@Immutable
+internal data class NavBadge(val count: Int, val tone: BadgeTone)
+
+/** The badge for one destination: the enabled-service count on the Services tab, nothing else. */
+internal fun badgeFor(index: Int, state: NavigationBadgeState): NavBadge? = when (index) {
+    BottomBarDestination.Accessibility.ordinal ->
+        state.enabledServiceCount.takeIf { it > 0 }?.let { NavBadge(it, BadgeTone.Accent) }
+
+    else -> null
+}
+
 @Composable
 fun BottomBar(
     blurBackdrop: LayerBackdrop?,
     backdrop: Backdrop,
+    navigationBadge: NavigationBadgeState,
     modifier: Modifier = Modifier,
 ) {
     when (LocalUiMode.current) {
-        UiMode.Miuix -> BottomBarMiuix(blurBackdrop, backdrop, modifier)
-        UiMode.Material -> BottomBarMaterial()
+        UiMode.Miuix -> BottomBarMiuix(blurBackdrop, backdrop, navigationBadge, modifier)
+        UiMode.Material -> BottomBarMaterial(navigationBadge)
     }
 }
 
 @Composable
 fun SideRail(
     blurBackdrop: LayerBackdrop?,
+    navigationBadge: NavigationBadgeState,
     modifier: Modifier = Modifier,
 ) {
     when (LocalUiMode.current) {
-        UiMode.Miuix -> NavigationRailMiuix(blurBackdrop, modifier)
-        UiMode.Material -> NavigationRailMaterial(modifier)
+        UiMode.Miuix -> NavigationRailMiuix(blurBackdrop, navigationBadge, modifier)
+        UiMode.Material -> NavigationRailMaterial(navigationBadge, modifier)
     }
 }

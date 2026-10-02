@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.AccessibilityNew
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Text
@@ -27,6 +26,7 @@ import dev.sol.accesshub.ui.LocalMainPagerState
 
 @Composable
 fun NavigationRailMaterial(
+    navigationBadge: NavigationBadgeState,
     modifier: Modifier = Modifier,
 ) {
     val mainPagerState = LocalMainPagerState.current
@@ -58,9 +58,10 @@ fun NavigationRailMaterial(
                     }
                 },
                 icon = {
-                    Icon(
-                        if (selected) selectedIcon else unselectedIcon,
-                        stringResource(label)
+                    NavigationIconWithBadge(
+                        icon = if (selected) selectedIcon else unselectedIcon,
+                        contentDescription = stringResource(label),
+                        badge = badgeFor(index, navigationBadge),
                     )
                 },
                 label = { Text(stringResource(label)) }
