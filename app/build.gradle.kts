@@ -21,13 +21,14 @@ val gitHash = providers.exec {
 // GitHub-hosted runners may lag behind the latest Android SDK platform. CI can
 // override these values without changing the local/release defaults.
 val compileSdkVersion = providers.gradleProperty("ci.compileSdk").map { it.toInt() }.orElse(37)
+val compileSdkMinorApi = providers.gradleProperty("ci.compileSdkMinor").map { it.toInt() }.orElse(0)
 val targetSdkVersion = providers.gradleProperty("ci.targetSdk").map { it.toInt() }.orElse(37)
 
 android {
     namespace = "dev.sol.accesshub"
     compileSdk {
         version = release(compileSdkVersion.get()) {
-            minorApiLevel = 0
+            minorApiLevel = compileSdkMinorApi.get()
         }
     }
 

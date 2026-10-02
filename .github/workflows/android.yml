@@ -44,7 +44,7 @@ jobs:
           echo "${SDKMANAGER_DIR}" >> "${GITHUB_PATH}"
           sdkmanager --version
           yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager "platforms;android-36"
+          sdkmanager "platforms;android-37.2"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -57,8 +57,9 @@ jobs:
           ./gradlew
           --no-daemon
           --stacktrace
-          -Pci.compileSdk=36
-          -Pci.targetSdk=36
+          -Pci.compileSdk=37
+          -Pci.compileSdkMinor=2
+          -Pci.targetSdk=37
           :app:lintDebug
           :app:testDebugUnitTest
           :app:assembleDebug
