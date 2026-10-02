@@ -56,6 +56,8 @@ import dev.sol.accesshub.ui.component.dialog.rememberConfirmDialog
 import dev.sol.accesshub.ui.component.material.SegmentedColumn
 import dev.sol.accesshub.ui.component.material.SegmentedListItem
 import dev.sol.accesshub.ui.component.material.TonalCard
+import androidx.compose.foundation.shape.RoundedCornerShape
+import dev.sol.accesshub.ui.LocalMainPagerState
 
 @Composable
 fun HomePagerMaterial(
@@ -81,7 +83,7 @@ fun HomePagerMaterial(
                 UpdateCard(state = state, actions = actions)
             }
             StatusCard(state = state, actions = actions)
-            InfoCard(state = state)
+            InfoCard(state = state, actions = actions)
             SupportLinks(actions = actions)
             Spacer(Modifier.height(bottomInnerPadding))
         }
@@ -192,11 +194,8 @@ private fun StatusCard(
     when (state.shizuku.state) {
         ShizukuState.READY -> {
             title = stringResource(R.string.home_provider_ready, providerName)
-            summary = stringResource(
-                R.string.home_shizuku_ready_summary,
-                state.shizuku.version,
-                state.shizuku.uid,
-            )
+            // The version moved out of the summary and became the API badge on the right.
+            summary = stringResource(R.string.home_shizuku_ready_uid, state.shizuku.uid)
         }
 
         ShizukuState.NO_PERMISSION -> {
@@ -246,7 +245,13 @@ private fun StatusCard(
             },
             headlineContent = { Text(text = title, style = MaterialTheme.typography.titleMedium) },
             supportingContent = { Text(text = summary, style = MaterialTheme.typography.bodyMedium) },
-            trailingContent = null,
+            trailingContent = if (ready) {
+                {
+                    ApiBadge(
+                        text = stringResource(R.string.home_shizuku_api_badge, state.shizuku.version),
+                    )
+                }
+            } else null,
             colors = ListItemDefaults.colors(
                 containerColor = Color.Transparent,
                 contentColor = contentColor,
@@ -280,14 +285,16 @@ private fun StatusCard(
 }
 
 @Composable
-private fun InfoCard(state: HomeUiState) {
+private fun InfoCard(state: HomeUiState, actions: HomeActions) {
     @Composable
     fun InfoCardItem(
         icon: ImageVector,
         label: String,
         content: String,
+        onClick: (() -> Unit)? = null,
     ) {
         SegmentedListItem(
+            onClick = onClick ?: {},
             headlineContent = { Text(text = label, style = MaterialTheme.typography.bodyLarge) },
             leadingContent = { Icon(imageVector = icon, contentDescription = label) },
             supportingContent = {
@@ -299,6 +306,9 @@ private fun InfoCard(state: HomeUiState) {
             },
         )
     }
+
+    val mainPagerState = LocalMainPagerState.current
+    val suiUrl = stringResource(R.string.home_sui_url)
 
     val shizukuContent = if (state.shizuku.isRunning) {
         stringResource(R.string.home_shizuku_value, state.shizuku.version, state.shizuku.uid) +
@@ -342,6 +352,13 @@ private fun InfoCard(state: HomeUiState) {
                             stringResource(R.string.home_shizuku_or_sui)
                         },
                         content = shizukuContent,
+                        onClick = {
+                            if (state.shizuku.provider == PrivilegedProvider.SUI) {
+                                actions.onOpenUrl(suiUrl)
+                            } else {
+                                actions.onOpenShizuku()
+                            }
+                        },
                     )
                 },
             )
@@ -358,6 +375,7 @@ private fun InfoCard(state: HomeUiState) {
                             state.accessibility.enabledCount,
                             state.accessibility.installedCount,
                         ),
+                        onClick = { mainPagerState.animateToPage(1) },
                     )
                 },
             )
@@ -405,4 +423,22 @@ private fun SupportLinks(actions: HomeActions) {
             },
         )
     )
+}
+
+/** Small pill mirroring LSPosed's API badge, pinned to the trailing edge of the status card. */
+@Composable
+private fun ApiBadge(text: String) {
+    // Bright Monet container: tertiaryContainer is the palette's soft accent, unlike the red
+    // errorContainer or the plain primaryContainer.
+    Surface(
+        shape = RoundedCornerShape(8.dp),
+        color = MaterialTheme.colorScheme.tertiaryContainer,
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onTertiaryContainer,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+        )
+    }
 }

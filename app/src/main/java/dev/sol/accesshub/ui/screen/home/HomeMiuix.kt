@@ -29,7 +29,6 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Accessibility
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.rounded.CheckCircleOutline
@@ -73,6 +72,11 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.clickable
+import dev.sol.accesshub.ui.LocalMainPagerState
 
 @Composable
 fun HomePagerMiuix(
@@ -117,7 +121,7 @@ fun HomePagerMiuix(
                             UpdateCard(state = state, actions = actions)
                         }
                         StatusCard(state = state, actions = actions)
-                        InfoCard(state = state)
+                        InfoCard(state = state, actions = actions)
                         SupportLinks(actions = actions)
                         Spacer(Modifier.height(bottomInnerPadding))
                     }
@@ -237,9 +241,6 @@ private fun ReadyStatusCard(state: HomeUiState) {
     val iconColor = if (isDynamicColor) colorScheme.primary.copy(alpha = 0.8f) else Color(0xFF36D167)
     val textColor = if (isDynamicColor) colorScheme.onSecondaryContainer else colorScheme.onSurface
     val providerName = state.shizuku.provider.displayName.ifEmpty { stringResource(R.string.home_shizuku_or_sui) }
-    val mode = stringResource(
-        if (state.shizuku.isRoot) R.string.home_shizuku_mode_root else R.string.home_shizuku_mode_adb
-    )
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -279,11 +280,8 @@ private fun ReadyStatusCard(state: HomeUiState) {
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        text = stringResource(
-                            R.string.home_shizuku_ready_summary,
-                            state.shizuku.version,
-                            state.shizuku.uid,
-                        ),
+                        // The version moved out of the summary and became the API badge below.
+                        text = stringResource(R.string.home_shizuku_ready_uid, state.shizuku.uid),
                         fontSize = 15.sp,
                         color = textColor.copy(alpha = 0.72f),
                     )
@@ -295,11 +293,8 @@ private fun ReadyStatusCard(state: HomeUiState) {
                     .padding(start = 24.dp, top = 24.dp, end = 148.dp, bottom = 20.dp),
                 contentAlignment = Alignment.BottomStart,
             ) {
-                Text(
-                    text = mode,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = textColor,
+                ApiBadgeMiuix(
+                    text = stringResource(R.string.home_shizuku_api_badge, state.shizuku.version),
                 )
             }
         }
@@ -334,18 +329,20 @@ private fun ActionStatusCard(
 }
 
 @Composable
-private fun InfoCard(state: HomeUiState) {
+private fun InfoCard(state: HomeUiState, actions: HomeActions) {
     @Composable
     fun InfoText(
         icon: ImageVector,
         title: String,
         content: String,
         bottomPadding: Dp = 24.dp,
+        onClick: (() -> Unit)? = null,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = bottomPadding),
+                .padding(bottom = bottomPadding)
+                .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
@@ -373,8 +370,12 @@ private fun InfoCard(state: HomeUiState) {
         }
     }
 
+    val mainPagerState = LocalMainPagerState.current
+    val suiUrl = stringResource(R.string.home_sui_url)
+
     val shizukuContent = if (state.shizuku.isRunning) {
-        stringResource(R.string.home_shizuku_value, state.shizuku.version, state.shizuku.uid)
+        stringResource(R.string.home_shizuku_value, state.shizuku.version, state.shizuku.uid) +
+            if (state.shizuku.isRoot) " · " + stringResource(R.string.home_shizuku_mode_root) else ""
     } else {
         stringResource(R.string.home_shizuku_unavailable)
     }
@@ -401,10 +402,19 @@ private fun InfoCard(state: HomeUiState) {
                     content = state.systemInfo.deviceModel,
                 )
                 InfoText(
-                    icon = Icons.Filled.Fingerprint,
-                    title = stringResource(R.string.home_fingerprint),
-                    content = state.systemInfo.fingerprint,
+                    icon = Icons.Filled.Code,
+                    title = state.shizuku.provider.displayName.ifEmpty {
+                        stringResource(R.string.home_shizuku_or_sui)
+                    },
+                    content = shizukuContent,
                     bottomPadding = 0.dp,
+                    onClick = {
+                        if (state.shizuku.provider == PrivilegedProvider.SUI) {
+                            actions.onOpenUrl(suiUrl)
+                        } else {
+                            actions.onOpenShizuku()
+                        }
+                    },
                 )
             }
         }
@@ -418,14 +428,8 @@ private fun InfoCard(state: HomeUiState) {
                         state.accessibility.enabledCount,
                         state.accessibility.installedCount,
                     ),
-                )
-                InfoText(
-                    icon = Icons.Filled.Code,
-                    title = state.shizuku.provider.displayName.ifEmpty {
-                        stringResource(R.string.home_shizuku_or_sui)
-                    },
-                    content = shizukuContent,
                     bottomPadding = 0.dp,
+                    onClick = { mainPagerState.animateToPage(1) },
                 )
             }
         }
@@ -467,6 +471,26 @@ private fun SupportLinks(actions: HomeActions) {
             onClick = { actions.onOpenUrl(shizukuUrl) },
             holdDownState = false,
             enabled = true,
+        )
+    }
+}
+
+/** Small pill mirroring LSPosed's API badge, under the status card's summary line. */
+@Composable
+private fun ApiBadgeMiuix(text: String) {
+    // Bright Monet container: tertiaryContainer is the palette's soft accent, unlike the red
+    // errorContainer or the plain primaryContainer.
+    val colorScheme = MiuixTheme.colorScheme
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(colorScheme.tertiaryContainer),
+    ) {
+        Text(
+            text = text,
+            fontSize = 12.sp,
+            color = colorScheme.onTertiaryContainer,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
         )
     }
 }
