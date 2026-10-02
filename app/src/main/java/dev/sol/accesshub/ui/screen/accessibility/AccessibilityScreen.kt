@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -26,12 +25,11 @@ fun AccessibilityPager(
     val latestIsCurrentPage by rememberUpdatedState(isCurrentPage)
     val initialResumeHandled = rememberSaveable { mutableStateOf(false) }
 
-    var hasActivated by rememberSaveable { mutableStateOf(false) }
+    // Refresh whenever this page becomes current, not just the first time: the theme page writes
+    // `serviceDescriptionMaxLines` while this page stays composed inside the pager, so the old
+    // one-shot activation guard kept the rows on the stale line count.
     LaunchedEffect(isCurrentPage) {
-        if (isCurrentPage && !hasActivated) {
-            hasActivated = true
-            viewModel.refresh()
-        }
+        if (isCurrentPage) viewModel.refresh()
     }
 
     // Coming back from the system accessibility settings must re-read the enabled set.
@@ -48,6 +46,9 @@ fun AccessibilityPager(
         onRefresh = viewModel::refresh,
         onRequestShizukuPermission = { ShizukuManager.requestPermission() },
         onDismissError = viewModel::dismissError,
+        onSearchStatusChange = viewModel::updateSearchStatus,
+        onSearchTextChange = viewModel::updateSearchText,
+        onClearSearch = viewModel::clearSearch,
     )
 
     when (LocalUiMode.current) {

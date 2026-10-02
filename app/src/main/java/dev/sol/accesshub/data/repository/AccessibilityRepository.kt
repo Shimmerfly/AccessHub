@@ -3,9 +3,11 @@ package dev.sol.accesshub.data.repository
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.Application
 import android.content.ComponentName
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
+import org.xmlpull.v1.XmlPullParser
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.graphics.drawable.toBitmap
 import dev.sol.accesshub.data.ServiceMeta
@@ -57,6 +59,10 @@ class AccessibilityRepository(private val app: Application) {
                 ?.takeIf { it.isNotBlank() } ?: appName
             val description = runCatching { info.loadDescription(pm) }.getOrNull()
                 ?.takeIf { it.isNotBlank() }
+                ?: readServiceDescriptionFromXml(pm, info, appInfo, pkg)
+            val isSystemApp = appInfo?.let {
+                (it.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0
+            } ?: false
             ServiceMeta(
                 id = id,
                 pkg = pkg,
@@ -65,6 +71,7 @@ class AccessibilityRepository(private val app: Application) {
                 appName = appName,
                 description = description,
                 icon = icon,
+                isSystemApp = isSystemApp,
                 settingsActivity = info.settingsActivityName?.takeIf { it.isNotBlank() },
             )
         }.sortedWith(compareBy({ it.appName.lowercase() }, { it.label.lowercase() }))
@@ -103,4 +110,44 @@ class AccessibilityRepository(private val app: Application) {
             .map { it.trim() }
             .filter { it.isNotEmpty() && it != "null" }
             .toSet()
+
+    /**
+     * [AccessibilityServiceInfo.loadDescription] can hand back nothing, so read
+     * `android:description` straight out of the service's `android.accessibilityservice` XML, the
+     * same place the framework takes it from.
+     */
+    private fun readServiceDescriptionFromXml(
+        pm: PackageManager,
+        info: AccessibilityServiceInfo,
+        appInfo: ApplicationInfo?,
+        pkg: String,
+    ): String? {
+        if (appInfo == null) return null
+        val serviceInfo = info.resolveInfo?.serviceInfo ?: return null
+
+        return runCatching {
+            serviceInfo.loadXmlMetaData(pm, META_DATA_ACCESSIBILITY_SERVICE)?.use { parser ->
+                var type = parser.eventType
+                while (type != XmlPullParser.END_DOCUMENT) {
+                    if (type == XmlPullParser.START_TAG && parser.name == TAG_ACCESSIBILITY_SERVICE) {
+                        val resId =
+                            parser.getAttributeResourceValue(ANDROID_NAMESPACE, "description", 0)
+                        return@use if (resId == 0) {
+                            null
+                        } else {
+                            pm.getText(pkg, resId, appInfo)?.toString()?.takeIf { it.isNotBlank() }
+                        }
+                    }
+                    type = parser.next()
+                }
+                null
+            }
+        }.getOrNull()
+    }
+
+    private companion object {
+        const val META_DATA_ACCESSIBILITY_SERVICE = "android.accessibilityservice"
+        const val TAG_ACCESSIBILITY_SERVICE = "accessibility-service"
+        const val ANDROID_NAMESPACE = "http://schemas.android.com/apk/res/android"
+    }
 }

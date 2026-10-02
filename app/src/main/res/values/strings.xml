@@ -45,6 +45,10 @@
     <string name="accessibility_empty_summary">Install an app that provides an accessibility service, then come back to this page.</string>
     <string name="accessibility_need_permission">Toggling services needs Shizuku or Sui access. Tap to request it.</string>
     <string name="accessibility_toggle_failed">Could not update the service: %1$s</string>
+    <string name="accessibility_search_hint">Search services</string>
+    <string name="accessibility_no_description">This service provides no description</string>
+    <string name="accessibility_search_empty">No matching service</string>
+    <string name="accessibility_system_apps">System apps</string>
 
     <string name="about_source_link" translatable="false">在%1$s 上查看源码</string>
 
@@ -53,10 +57,16 @@
     <string name="permission_ready">Core permissions are ready.</string>
     <string name="permission_missing">Grant missing permissions first.</string>
     <string name="permission_storage">Storage Access</string>
+    <string name="permission_storage_summary">Read and write patch and module files</string>
     <string name="permission_notification">Notifications</string>
+    <string name="permission_notification_summary">Show background status and packaging progress</string>
     <string name="permission_microphone">Microphone</string>
+    <string name="permission_microphone_summary">Voice input and recording</string>
     <string name="permission_battery">Battery Whitelist</string>
+    <string name="permission_battery_summary">Keep the background process from being killed</string>
     <string name="permission_overlay">Overlay</string>
+    <string name="permission_overlay_summary">Draw on top of other apps</string>
+    <string name="permission_recheck">Recheck permissions</string>
     <string name="permission_granted">Granted</string>
     <string name="permission_required">Required</string>
     <string name="permission_optional">Optional</string>
@@ -87,6 +97,13 @@
     <string name="settings_key_color_default">Default</string>
     <string name="settings_ui_mode">UI Style</string>
     <string name="settings_ui_mode_summary">Choose the interface style.</string>
+    <string name="settings_navigation_badge">Navigation badge</string>
+    <string name="settings_navigation_badge_summary">Show the number of enabled services on the Services tab</string>
+    <string name="settings_hide_system_apps">Hide system apps</string>
+    <string name="settings_hide_system_apps_summary">Hide the system-app section on the Services page</string>
+    <string name="settings_service_description_max_lines">Service description lines</string>
+    <string name="settings_service_description_max_lines_summary">How many lines of an expanded service description to show</string>
+    <string name="settings_service_description_max_lines_all">All</string>
     <string name="settings_page_scale">Page Scale</string>
     <string name="settings_page_scale_summary">Adjust the global display scale.</string>
     <string name="settings_color_spec">Color Spec</string>
