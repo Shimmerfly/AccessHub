@@ -85,6 +85,11 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import dev.sol.accesshub.data.repository.EnabledServicesCounter
+import androidx.compose.ui.res.stringResource
+import dev.sol.accesshub.shizuku.ShizukuManager
+import dev.sol.accesshub.shizuku.ShizukuState
+import dev.sol.accesshub.ui.component.dialog.rememberConfirmDialog
+import dev.sol.accesshub.ui.theme.LocalOnSelectPage
 
 class MainActivity : ComponentActivity() {
 
@@ -194,6 +199,32 @@ fun MainScreen(
     val enableFloatingBottomBarBlur = LocalEnableFloatingBottomBarBlur.current
     val pagerState = rememberPagerState(initialPage = initialPage, pageCount = { MainPagerConfig.PAGE_COUNT })
     val mainPagerState = rememberMainPagerState(pagerState)
+
+    // The services page cannot switch accessibility services without Shizuku, so tapping its tab
+    // asks for the permission instead of moving there.
+    val shizukuStatus by ShizukuManager.status.collectAsStateWithLifecycle()
+    val needsShizukuPermission = shizukuStatus.state == ShizukuState.NO_PERMISSION
+    val permissionTitle = stringResource(R.string.accessibility_shizuku_permission_title)
+    val permissionMessage = stringResource(R.string.accessibility_shizuku_permission_message)
+    val permissionGrant = stringResource(R.string.accessibility_shizuku_permission_grant)
+    val permissionDialog = rememberConfirmDialog(
+        onConfirm = { ShizukuManager.requestPermission() },
+    )
+    val selectPage: (Int) -> Unit = { index ->
+        if (index == SERVICES_PAGE && needsShizukuPermission) {
+            permissionDialog.showConfirm(
+                title = permissionTitle,
+                content = permissionMessage,
+                markdown = false,
+                html = false,
+                confirm = permissionGrant,
+                dismiss = null,
+                isWarning = true,
+            )
+        } else {
+            mainPagerState.animateToPage(index)
+        }
+    }
     var userScrollEnabled by remember { mutableStateOf(true) }
     val uiMode = LocalUiMode.current
     val surfaceColor = when (uiMode) {
@@ -246,7 +277,8 @@ fun MainScreen(
     val useNavigationRail = isLandscape && !enableFloatingBottomBar
 
     CompositionLocalProvider(
-        LocalMainPagerState provides mainPagerState
+        LocalMainPagerState provides mainPagerState,
+        LocalOnSelectPage provides selectPage,
     ) {
         val contentReady = rememberContentReady()
         val pagerContent = @Composable { bottomInnerPadding: Dp ->
@@ -354,3 +386,6 @@ private fun MainScreenBackHandler(
         }
     )
 }
+
+/** Index of the services page inside the main pager. */
+private const val SERVICES_PAGE = 1

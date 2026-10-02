@@ -43,6 +43,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import dev.sol.accesshub.ui.theme.LocalOnSelectPage
 
 @Composable
 fun BottomBarMiuix(
@@ -52,6 +53,7 @@ fun BottomBarMiuix(
     modifier: Modifier,
 ) {
     val mainState = LocalMainPagerState.current
+    val onSelectPage = LocalOnSelectPage.current
     val enableFloatingBottomBar = LocalEnableFloatingBottomBar.current
     val enableFloatingBottomBarBlur = LocalEnableFloatingBottomBarBlur.current
 
@@ -83,7 +85,7 @@ fun BottomBarMiuix(
                                     label = item.label,
                                     selected = mainState.selectedPage == index,
                                     onClick = {
-                                        mainState.animateToPage(index)
+                                        onSelectPage(index)
                                     }
                                 )
                             }
@@ -111,7 +113,7 @@ fun BottomBarMiuix(
                 )
                 .padding(bottom = 12.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
             selectedIndex = { mainState.selectedPage },
-            onSelected = { mainState.animateToPage(it) },
+            onSelected = { onSelectPage(it) },
             backdrop = backdrop,
             tabsCount = items.size,
             isBlurEnabled = enableFloatingBottomBarBlur,
@@ -119,7 +121,7 @@ fun BottomBarMiuix(
             items.forEachIndexed { index, item ->
                 FloatingBottomBarItem(
                     onClick = {
-                        mainState.animateToPage(index)
+                        onSelectPage(index)
                     },
                     modifier = Modifier.defaultMinSize(minWidth = 76.dp)
                 ) {

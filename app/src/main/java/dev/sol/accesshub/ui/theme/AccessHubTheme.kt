@@ -133,3 +133,11 @@ val LocalEnableFloatingBottomBarBlur = staticCompositionLocalOf { false }
 
 /** Whether the floating bottom bar prints a label under each icon. */
 val LocalShowFloatingBottomBarLabels = staticCompositionLocalOf { false }
+
+/**
+ * Page selection for the navigation bars. MainActivity installs a handler so tapping a tab can be
+ * intercepted (the services page asks for Shizuku permission first) instead of always moving.
+ */
+typealias SelectPageHandler = (Int) -> Unit
+
+val LocalOnSelectPage = staticCompositionLocalOf<SelectPageHandler> { { _ -> } }

@@ -19,6 +19,7 @@ import top.yukonga.miuix.kmp.basic.NavigationRailDefaults
 import top.yukonga.miuix.kmp.basic.NavigationRailItem
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import dev.sol.accesshub.ui.theme.LocalOnSelectPage
 
 @Composable
 fun NavigationRailMiuix(
@@ -27,6 +28,7 @@ fun NavigationRailMiuix(
     modifier: Modifier = Modifier,
 ) {
     val mainState = LocalMainPagerState.current
+    val onSelectPage = LocalOnSelectPage.current
 
     val items = BottomBarDestination.entries.map { destination ->
         Pair(stringResource(destination.label), destination.icon)
@@ -50,7 +52,7 @@ fun NavigationRailMiuix(
                         label = label,
                         selected = mainState.selectedPage == index,
                         onClick = {
-                            mainState.animateToPage(index)
+                            onSelectPage(index)
                         },
                         modifier = Modifier.fillMaxWidth(),
                     )

@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import dev.sol.accesshub.R
 import dev.sol.accesshub.ui.LocalMainPagerState
+import dev.sol.accesshub.ui.theme.LocalOnSelectPage
 
 @Composable
 fun NavigationRailMaterial(
@@ -30,6 +31,7 @@ fun NavigationRailMaterial(
     modifier: Modifier = Modifier,
 ) {
     val mainPagerState = LocalMainPagerState.current
+    val onSelectPage = LocalOnSelectPage.current
 
     val items = listOf(
         Triple(R.string.home, Icons.Filled.Home, Icons.Outlined.Home),
@@ -54,7 +56,7 @@ fun NavigationRailMaterial(
                 selected = selected,
                 onClick = {
                     if (!selected) {
-                        mainPagerState.animateToPage(index)
+                        onSelectPage(index)
                     }
                 },
                 icon = {

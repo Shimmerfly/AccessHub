@@ -41,6 +41,7 @@ import dev.sol.accesshub.ui.component.FloatingBottomBarItem
 import dev.sol.accesshub.ui.theme.LocalEnableFloatingBottomBar
 import dev.sol.accesshub.ui.theme.LocalShowFloatingBottomBarLabels
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import dev.sol.accesshub.ui.theme.LocalOnSelectPage
 
 @Composable
 fun BottomBarMaterial(
@@ -48,6 +49,7 @@ fun BottomBarMaterial(
     modifier: Modifier = Modifier,
 ) {
     val mainPagerState = LocalMainPagerState.current
+    val onSelectPage = LocalOnSelectPage.current
     val enableFloatingBottomBar = LocalEnableFloatingBottomBar.current
 
     val items = listOf(
@@ -77,7 +79,7 @@ fun BottomBarMaterial(
             FloatingBottomBar(
             modifier = modifier,
             selectedIndex = { mainPagerState.selectedPage },
-            onSelected = { mainPagerState.animateToPage(it) },
+            onSelected = { onSelectPage(it) },
             backdrop = backdrop,
             tabsCount = items.size,
             isBlurEnabled = false,
@@ -86,7 +88,7 @@ fun BottomBarMaterial(
                 FloatingBottomBarItem(
                     onClick = {
                         if (mainPagerState.selectedPage != index) {
-                            mainPagerState.animateToPage(index)
+                            onSelectPage(index)
                         }
                     },
                     modifier = Modifier.defaultMinSize(minWidth = 76.dp),
@@ -124,7 +126,7 @@ fun BottomBarMaterial(
                 selected = selected,
                 onClick = {
                     if (!selected) {
-                        mainPagerState.animateToPage(index)
+                        onSelectPage(index)
                     }
                 },
                 icon = {
