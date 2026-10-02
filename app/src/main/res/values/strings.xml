@@ -136,4 +136,7 @@
     <string name="accessibility_talkback_enable_anyway">Enable anyway</string>
     <string name="home_shizuku_ready_uid">UID %1$d</string>
     <string name="home_shizuku_api_badge">API %1$d</string>
+    <string name="accessibility_shizuku_permission_title">Grant Shizuku permission?</string>
+    <string name="accessibility_shizuku_permission_message">The services page needs Shizuku (or Sui) permission before it can switch accessibility services on and off.</string>
+    <string name="accessibility_shizuku_permission_grant">Grant</string>
 </resources>
