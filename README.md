@@ -31,7 +31,7 @@ AccessHub 是一个通过 **[Shizuku](https://shizuku.rikka.app/) / [Sui](https:
 
 ---
 
-## 工作方式以及贡献指南[见此](Contribute-guide.md)
+## 工作方式以及贡献指南[见此](CONTRIBUTING.md)
 
 ---
 
