@@ -19,7 +19,7 @@ fun AboutScreen() {
     val appName = stringResource(R.string.app_name)
     val htmlString = stringResource(
         id = R.string.about_source_link,
-        "<b><a href=\"https://github.com/chenaizhang/KernelSU-Style-UI-Kit\">Github</a></b>"
+        "<b><a href=\"https://github.com/Shimmerfly/AccessHub\">Github</a></b>"
     )
     // Parse once per string, not once per recomposition: the state must also stay the same instance
     // so the page below can skip recomposition instead of redoing the whole list every frame.
