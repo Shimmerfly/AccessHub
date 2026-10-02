@@ -40,6 +40,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.MenuOpen
 import androidx.compose.material.icons.filled.Brightness1
@@ -49,7 +50,9 @@ import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.rounded.AspectRatio
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.DesignServices
+import androidx.compose.material.icons.rounded.Pin
 import androidx.compose.material.icons.rounded.Style
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Icon
@@ -133,6 +136,7 @@ fun ColorPaletteScreenMaterial(
         },
         contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
     ) { paddingValues ->
+        val context = LocalContext.current
         val navBars = WindowInsets.navigationBars.asPaddingValues()
         val captionBar = WindowInsets.captionBar.asPaddingValues()
 
@@ -144,11 +148,23 @@ fun ColorPaletteScreenMaterial(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             val isDark = currentColorMode.isDark || currentColorMode.isSystem && isSystemInDarkTheme()
+            // Wallpaper palette used by the "default" preview entries. Every preview palette is
+            // generated off the main thread, so these first frames stay cheap.
+            val dynamicBase = if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            val previewSchemes = rememberDeferredKeyColorSchemes(
+                isDark = isDark,
+                style = colorStyle,
+                specVersion = colorSpec,
+                dynamicPrimary = dynamicBase.primary,
+                dynamicSecondary = dynamicBase.secondary,
+                dynamicTertiary = dynamicBase.tertiary,
+                dynamicNeutral = dynamicBase.surface,
+                dynamicNeutralVariant = dynamicBase.surfaceVariant,
+                dynamicError = dynamicBase.error,
+            )
             ThemePreviewCard(
                 keyColor = currentKeyColor,
-                isDark = isDark,
-                paletteStyle = colorStyle,
-                colorSpec = colorSpec,
+                colorSchemes = previewSchemes,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -162,7 +178,9 @@ fun ColorPaletteScreenMaterial(
                     ColorButtonMaterial(
                         color = Color.Unspecified,
                         isSelected = currentKeyColor == 0,
+                        colorSchemes = previewSchemes,
                         isDark = isDark,
+                        isAmoled = currentColorMode.isAmoled,
                         paletteStyle = colorStyle,
                         colorSpec = colorSpec,
                         onClick = {
@@ -175,7 +193,9 @@ fun ColorPaletteScreenMaterial(
                     ColorButtonMaterial(
                         color = Color(color),
                         isSelected = currentKeyColor == color,
+                        colorSchemes = previewSchemes,
                         isDark = isDark,
+                        isAmoled = currentColorMode.isAmoled,
                         paletteStyle = colorStyle,
                         colorSpec = colorSpec,
                         onClick = {
@@ -283,6 +303,30 @@ fun ColorPaletteScreenMaterial(
                     )
                 }
 
+                SegmentedColumn(
+                    modifier = Modifier.padding(top = 4.dp),
+                    content = listOf(
+                        {
+                            SegmentedSwitchItem(
+                                icon = Icons.Rounded.Pin,
+                                title = stringResource(id = R.string.settings_navigation_badge),
+                                summary = stringResource(id = R.string.settings_navigation_badge_summary),
+                                checked = uiState.enableNavigationBadge,
+                                onCheckedChange = actions.onSetEnableNavigationBadge
+                            )
+                        },
+                        {
+                            SegmentedSwitchItem(
+                                icon = Icons.Filled.Android,
+                                title = stringResource(id = R.string.settings_hide_system_apps),
+                                summary = stringResource(id = R.string.settings_hide_system_apps_summary),
+                                checked = uiState.hideSystemApps,
+                                onCheckedChange = actions.onSetHideSystemApps
+                            )
+                        }
+                    )
+                )
+
                 TonalCard(modifier = Modifier.padding(top = 4.dp)) {
                     var sliderValue by remember(uiState.pageScale) { mutableFloatStateOf(uiState.pageScale) }
 
@@ -330,6 +374,62 @@ fun ColorPaletteScreenMaterial(
                         )
                     }
                 }
+
+                TonalCard(modifier = Modifier.padding(top = 4.dp)) {
+                    var linesValue by remember(uiState.serviceDescriptionMaxLines) {
+                        mutableFloatStateOf(uiState.serviceDescriptionMaxLines.toFloat())
+                    }
+
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Rounded.Description,
+                                contentDescription = stringResource(id = R.string.settings_service_description_max_lines),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.settings_service_description_max_lines),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = stringResource(id = R.string.settings_service_description_max_lines_summary),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.outline
+                                )
+                            }
+                            Text(
+                                // 10 is the "no truncation" end of the range and reads as "All".
+                                text = if (linesValue.toInt() >= 10) {
+                                    stringResource(R.string.settings_service_description_max_lines_all)
+                                } else {
+                                    linesValue.toInt().toString()
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        Slider(
+                            value = linesValue,
+                            onValueChange = { linesValue = it },
+                            onValueChangeFinished = { actions.onSetServiceDescriptionMaxLines(linesValue.toInt()) },
+                            valueRange = 1f..10f,
+                            steps = 8,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp + navBars.calculateBottomPadding() + captionBar.calculateBottomPadding()))
@@ -341,40 +441,17 @@ fun ColorPaletteScreenMaterial(
 @Composable
 private fun ThemePreviewCard(
     keyColor: Int,
-    isDark: Boolean,
-    paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
-    colorSpec: ColorSpec.SpecVersion = ColorSpec.SpecVersion.SPEC_2021,
+    colorSchemes: PaletteSchemes,
 ) {
-    val context = LocalContext.current
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.toFloat()
     val screenHeight = configuration.screenHeightDp.toFloat()
     val screenRatio = screenWidth / screenHeight
-    val dynamicColor = keyColor == 0
 
-    val colorScheme = if (dynamicColor) {
-        val baseScheme = if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        rememberDynamicColorScheme(
-            seedColor = Color.Unspecified,
-            isDark = isDark,
-            style = paletteStyle,
-            specVersion = colorSpec,
-            primary = baseScheme.primary,
-            secondary = baseScheme.secondary,
-            tertiary = baseScheme.tertiary,
-            neutral = baseScheme.surface,
-            neutralVariant = baseScheme.surfaceVariant,
-            error = baseScheme.error
-        )
-    } else {
-        rememberDynamicColorScheme(
-            seedColor = Color(keyColor),
-            isDark = isDark,
-            style = paletteStyle,
-            specVersion = colorSpec,
-        )
-
-    }
+    // Palette [keyColor] is already generated off the main thread; until it lands (first frames of
+    // the page) the card borrows the current theme colours as a cheap, similar-looking stand-in.
+    val colorScheme = colorSchemes[if (keyColor == 0) Color.Unspecified else Color(keyColor)]
+        ?: MaterialTheme.colorScheme
 
     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
         Surface(
@@ -481,35 +558,35 @@ private fun PreviewBlock(
 private fun ColorButtonMaterial(
     color: Color,
     isSelected: Boolean,
+    colorSchemes: PaletteSchemes,
     isDark: Boolean,
-    paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
-    colorSpec: ColorSpec.SpecVersion = ColorSpec.SpecVersion.SPEC_2021,
+    isAmoled: Boolean,
+    paletteStyle: PaletteStyle,
+    colorSpec: ColorSpec.SpecVersion,
     onClick: () -> Unit
 ) {
-    val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
-    val colorScheme = if (color == Color.Unspecified) {
-        val baseScheme = if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        rememberDynamicColorScheme(
-            seedColor = Color.Unspecified,
-            isDark = isDark,
-            style = paletteStyle,
-            specVersion = colorSpec,
-            primary = baseScheme.primary,
-            secondary = baseScheme.secondary,
-            tertiary = baseScheme.tertiary,
-            neutral = baseScheme.surface,
-            neutralVariant = baseScheme.surfaceVariant,
-            error = baseScheme.error
-        )
+    // Upstream's approach: every visible swatch generates its own palette, so the row is correct on
+    // the very first frame and only the handful of composed items pay for it. The wallpaper entry
+    // already runs inside the app's own dynamic scheme, so it needs no generation at all.
+    val scheme = colorSchemes[color] ?: if (color == Color.Unspecified) {
+        MaterialTheme.colorScheme
     } else {
-        rememberDynamicColorScheme(
-            seedColor = color,
+        remember(color, isDark, isAmoled, paletteStyle, colorSpec) {
+            cachedColorScheme(
+            color = color,
             isDark = isDark,
+            isAmoled = isAmoled,
             style = paletteStyle,
-            specVersion = colorSpec,
-        )
+                specVersion = colorSpec,
+            )
+        }
     }
+    val containerColor = scheme.surfaceContainer
+    val primaryContainerColor = scheme.primaryContainer
+    val tertiaryContainerColor = scheme.tertiaryContainer
+    val accentColor = scheme.primary
+    val onAccentColor = scheme.onPrimary
 
     Surface(
         onClick = {
@@ -517,19 +594,19 @@ private fun ColorButtonMaterial(
             onClick()
         },
         shape = RoundedCornerShape(20.dp),
-        color = colorScheme.surfaceContainer,
+        color = containerColor,
         modifier = Modifier.size(72.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
             Canvas(modifier = Modifier.size(48.dp)) {
                 drawArc(
-                    color = colorScheme.primaryContainer,
+                    color = primaryContainerColor,
                     startAngle = 180f,
                     sweepAngle = 180f,
                     useCenter = true
                 )
                 drawArc(
-                    color = colorScheme.tertiaryContainer,
+                    color = tertiaryContainerColor,
                     startAngle = 0f,
                     sweepAngle = 180f,
                     useCenter = true
@@ -552,19 +629,19 @@ private fun ColorButtonMaterial(
                     Box(
                         modifier = Modifier
                             .size(56.dp)
-                            .border(2.dp, colorScheme.primary, CircleShape),
+                            .border(2.dp, accentColor, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Box(
                             modifier = Modifier
                                 .size(24.dp)
                                 .clip(CircleShape)
-                                .background(colorScheme.primary, CircleShape)
+                                .background(accentColor, CircleShape)
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.Check,
                                 contentDescription = null,
-                                tint = colorScheme.onPrimary,
+                                tint = onAccentColor,
                                 modifier = Modifier
                                     .align(Alignment.Center)
                                     .size(16.dp)
@@ -580,7 +657,7 @@ private fun ColorButtonMaterial(
                     Box(
                         modifier = Modifier
                             .size(20.dp)
-                            .background(colorScheme.primary, CircleShape)
+                            .background(accentColor, CircleShape)
                     )
                 }
             }

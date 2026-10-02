@@ -50,6 +50,9 @@ fun ColorPaletteScreen() {
         onSetEnableBlur = viewModel::setEnableBlur,
         onSetEnableFloatingBottomBar = viewModel::setEnableFloatingBottomBar,
         onSetEnableFloatingBottomBarBlur = viewModel::setEnableFloatingBottomBarBlur,
+        onSetEnableNavigationBadge = viewModel::setEnableNavigationBadge,
+        onSetHideSystemApps = viewModel::setHideSystemApps,
+        onSetServiceDescriptionMaxLines = viewModel::setServiceDescriptionMaxLines,
         onSetEnablePredictiveBack = {
             viewModel.setEnablePredictiveBack(it)
             AccessHubApp.setEnableOnBackInvokedCallback(context.applicationInfo, it)
