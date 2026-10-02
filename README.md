@@ -5,6 +5,7 @@
 **用 Shizuku / Sui 一屏管理所有无障碍服务，不用再钻系统设置**
 
 [![License](https://img.shields.io/github/license/Shimmerfly/AccessHub?label=License&color=blue)](LICENSE)
+[![Build](https://github.com/Shimmerfly/AccessHub/actions/workflows/android.yml/badge.svg?branch=AccessHub&label=Build)](https://github.com/Shimmerfly/AccessHub/actions/workflows/android.yml)
 [![Platform](https://img.shields.io/badge/Platform-Android%207.0%2B-3DDC84?logo=android&logoColor=white)](#环境要求)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.20-7F52FF?logo=kotlin&logoColor=white)](#技术栈)
 [![compileSdk](https://img.shields.io/badge/compileSdk-37-3DDC84?logo=android&logoColor=white)](#技术栈)
