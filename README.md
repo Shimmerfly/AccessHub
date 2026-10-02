@@ -10,7 +10,7 @@
 [![compileSdk](https://img.shields.io/badge/compileSdk-37-3DDC84?logo=android&logoColor=white)](#技术栈)
 [![Shizuku API](https://img.shields.io/badge/Shizuku%20API-13.1.5-5A45FF)](https://shizuku.rikka.app/)
 [![Sui](https://img.shields.io/badge/Sui-supported-5A45FF)](https://github.com/RikkaApps/Sui)
-[![UI](https://img.shields.io/badge/UI-Miuix%20%7C%20Material%203%20Expressive-6750A4)](#界面)
+[![UI](https://img.shields.io/badge/UI-Material%203%20Expressive-6750A4)](#界面)
 
 [![Stars](https://img.shields.io/github/stars/Shimmerfly/AccessHub?style=social)](https://github.com/Shimmerfly/AccessHub/stargazers)
 [![Forks](https://img.shields.io/github/forks/Shimmerfly/AccessHub?style=social)](https://github.com/Shimmerfly/AccessHub/network/members)
@@ -23,7 +23,7 @@ AccessHub 是一个通过 **[Shizuku](https://shizuku.rikka.app/) / [Sui](https:
 以 ADB（shell）或 Root 身份读写系统无障碍服务列表的 Android 应用喵。
 它把散落在「设置 → 无障碍 → 已安装的服务」里的开关集中到一屏，拨一下就能启用 / 禁用任意服务。
 
-- 界面结构参考 **[KernelSU](https://github.com/tiann/KernelSU) 管理器**，同时提供 **Miuix** 与 **Material 3 Expressive** 两套界面风格
+- 界面结构参考 **[KernelSU](https://github.com/tiann/KernelSU) 管理器**，界面统一采用 **Material 3 Expressive**
 - **不需要 root**：Shizuku 可以用「无线调试」启动；有 root 的话也可以用 Sui（Magisk 模块）
 - **没授权也能看**：枚举服务与读取当前状态用的是公开 API，写入才需要特权
 
@@ -55,7 +55,7 @@ AccessHub 是一个通过 **[Shizuku](https://shizuku.rikka.app/) / [Sui](https:
 
 ### 设置
 
-- 界面风格（Miuix / Material 3 Expressive）、主题模式、Monet 动态取色、强调色、色彩标准与风格
+- 主题模式、Monet 动态取色、强调色、色彩标准与风格
 - 界面缩放、顶栏/底栏模糊、Apple 风格悬浮底栏、液态玻璃、预测性返回手势
 - 检查更新开关
 
@@ -74,12 +74,10 @@ AccessHub 是一个通过 **[Shizuku](https://shizuku.rikka.app/) / [Sui](https:
 | --- | --- |
 | **主页** | Shizuku / Sui 状态、更新提示、设备与无障碍信息、快捷链接 |
 | **服务** | 无障碍服务列表 + 开关（本应用的核心功能） |
-| **设置** | 界面风格、主题、动画与更新等选项 |
+| **设置** | 主题、动画与更新等选项 |
 
-两套界面风格共用同一套状态与逻辑，可在设置里随时切换喵：
-
-- **Miuix**（默认）：`top.yukonga.miuix.kmp`，与 KernelSU 管理器同源的卡片 / 顶栏 / 开关观感
-- **Material 3 Expressive**：`androidx.compose.material3` 1.5.0-alpha22，配合动态取色与表现主义圆角
+界面统一采用 **Material 3 Expressive**：`androidx.compose.material3` 1.5.0-alpha22，配合动态取色与表现主义圆角。
+Miuix（`top.yukonga.miuix.kmp`）的整套实现仍保留在源码中，但设置里已不再提供切换，应用固定以 Material 3 呈现喵。
 
 ---
 
@@ -188,7 +186,7 @@ sdk.dir=/path/to/Android/Sdk
 | Gradle Wrapper | 9.7.1 |
 | Compose BOM | 2026.05.01 |
 | Material 3 (Expressive) | 1.5.0-alpha22 |
-| Miuix (KMP) | 0.9.2 |
+| Miuix (KMP) | 0.9.2（实现保留，未启用）|
 | Navigation 3 | 1.1.2 |
 | MaterialKolor | 4.1.1 |
 | Shizuku api / provider | 13.1.5 |
