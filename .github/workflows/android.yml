@@ -1,0 +1,91 @@
+name: Android CI
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+concurrency:
+  group: android-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Lint, test and build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install Android SDK packages
+        run: |
+          echo "ANDROID_HOME=${ANDROID_HOME}"
+          SDKMANAGER_DIR="$(dirname "$(find "${ANDROID_HOME}/cmdline-tools" -type f -name sdkmanager -print -quit)")"
+          test -x "${SDKMANAGER_DIR}/sdkmanager"
+          echo "Using sdkmanager from ${SDKMANAGER_DIR}"
+          export PATH="${SDKMANAGER_DIR}:${PATH}"
+          echo "${SDKMANAGER_DIR}" >> "${GITHUB_PATH}"
+          sdkmanager --version
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platforms;android-37.2"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for Gradle wrapper
+        run: chmod +x ./gradlew
+
+      - name: Run lint, unit tests and builds
+        run: >-
+          ./gradlew
+          --no-daemon
+          --stacktrace
+          -Pci.compileSdk=37
+          -Pci.compileSdkMinor=2
+          -Pci.targetSdk=37
+          :app:lintDebug
+          :app:testDebugUnitTest
+          :app:assembleDebug
+          :app:assembleRelease
+
+      - name: Prepare named APKs
+        if: ${{ success() }}
+        run: |
+          mkdir -p artifacts
+          cp app/build/outputs/apk/debug/app-debug.apk artifacts/app-debug.apk
+          cp app/build/outputs/apk/release/app-release.apk artifacts/app-release.apk
+
+      - name: Upload APKs
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: accesshub-apks-${{ github.sha }}
+          path: artifacts/app-*.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload lint reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: accesshub-lint-report-${{ github.sha }}
+          path: app/build/reports/lint/**
+          if-no-files-found: warn
+          retention-days: 14
