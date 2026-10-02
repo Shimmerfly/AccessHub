@@ -44,7 +44,7 @@ jobs:
           echo "${SDKMANAGER_DIR}" >> "${GITHUB_PATH}"
           sdkmanager --version
           yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager "platforms;android-37" "build-tools;37.0.0"
+          sdkmanager --channel=1 "platforms;android-37"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
