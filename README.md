@@ -29,9 +29,10 @@ AccessHub 是一个通过 **[Shizuku](https://shizuku.rikka.app/) / [Sui](https:
 > [!CAUTION]
 > 无障碍服务权限极高（可读取屏幕内容并代为操作），请务必只为信任的服务开启!
 
----
-
-## 工作方式以及贡献指南[见此](CONTRIBUTING.md)
+> [!NOTE]
+> 本项目完全由 AI 生成，无人工，纯 AI（）
+>
+> 未识别到人脸 2333 
 
 ---
 
