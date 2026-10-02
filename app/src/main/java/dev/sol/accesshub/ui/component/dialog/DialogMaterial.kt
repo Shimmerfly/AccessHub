@@ -17,6 +17,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import dev.sol.accesshub.ui.component.markdown.MarkdownContent
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material3.Icon
 
 @Composable
 fun LoadingDialogMaterial(showDialog: MutableState<Boolean>) {
@@ -51,6 +55,10 @@ fun ConfirmDialogMaterial(
                 dismiss()
                 showDialog.value = false
             },
+            // Sits above the title, the M3 place for a warning glyph.
+            icon = if (visuals.isWarning) {
+                { Icon(imageVector = Icons.Rounded.Warning, contentDescription = null, modifier = Modifier.size(40.dp)) }
+            } else null,
             title = { Text(visuals.title) },
             text = {
                 visuals.content?.let { content ->

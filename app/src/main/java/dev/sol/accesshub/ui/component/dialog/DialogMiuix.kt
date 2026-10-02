@@ -29,6 +29,11 @@ import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.LocalDismissState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowDialog
+import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.size
 
 @Composable
 fun LoadingDialogMiuix(showDialog: MutableState<Boolean>) {
@@ -75,6 +80,16 @@ fun ConfirmDialogMiuix(
         content = {
             Layout(
                 content = {
+                    if (visuals.isWarning) {
+                        Icon(
+                            imageVector = Icons.Rounded.Warning,
+                            contentDescription = null,
+                            // padding first, so the 8dp gap sits outside the 40dp glyph.
+                            modifier = Modifier
+                                .padding(bottom = 8.dp)
+                                .size(40.dp),
+                        )
+                    }
                     val dismissState = LocalDismissState.current
                     visuals.content?.let { content ->
                         when {
