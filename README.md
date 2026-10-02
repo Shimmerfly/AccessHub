@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/icon.png" width="128" alt="AccessHub 图标">
+<img src="assets/icon.png" width="128" alt="AccessHub 图标" style="border-radius:26px">
 
 # AccessHub · 无障碍管家
 
